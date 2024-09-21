@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/Interdimensional-Show/static/css/main.1e509aa5.css",
+    "main.js": "/Interdimensional-Show/static/js/main.26a5751e.js",
+    "static/js/511.4db4408c.chunk.js": "/Interdimensional-Show/static/js/511.4db4408c.chunk.js",
+    "static/media/bg.jpg": "/Interdimensional-Show/static/media/bg.e11058de4eaf42073215.jpg",
+    "static/media/logo.png": "/Interdimensional-Show/static/media/logo.c335d3233fd0fdd4aeb7.png",
+    "static/media/1215607_71.jpg": "/Interdimensional-Show/static/media/1215607_71.f2e16c714665759b7d7a.jpg",
+    "static/media/1215608_72.jpg": "/Interdimensional-Show/static/media/1215608_72.1a1c9dcf7c83d584ab8d.jpg",
+    "static/media/user.png": "/Interdimensional-Show/static/media/user.354c1c2649c989f859a2.png",
+    "static/media/27999669_7252005.jpg": "/Interdimensional-Show/static/media/27999669_7252005.3b5857a7ad469768de80.jpg",
+    "static/media/24504365_03092022_rorozoa_10.jpg": "/Interdimensional-Show/static/media/24504365_03092022_rorozoa_10.2ca1a42d741f8d202552.jpg",
+    "index.html": "/Interdimensional-Show/index.html",
+    "main.1e509aa5.css.map": "/Interdimensional-Show/static/css/main.1e509aa5.css.map",
+    "main.26a5751e.js.map": "/Interdimensional-Show/static/js/main.26a5751e.js.map",
+    "511.4db4408c.chunk.js.map": "/Interdimensional-Show/static/js/511.4db4408c.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1e509aa5.css",
+    "static/js/main.26a5751e.js"
+  ]
+}
