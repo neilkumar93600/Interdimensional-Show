@@ -1,282 +1,355 @@
-import React from 'react';
-import '../style/App.css'; // Import styles
-import music1 from '../asset/1215607_71.jpg'
-import music2 from '../asset/1215608_72.jpg'
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-function Home() {
+const Home = () => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [selectedLanguage, setSelectedLanguage] = useState('global');
+    const [selectedTimeframe, setSelectedTimeframe] = useState('all-time');
+    const [isYearly, setIsYearly] = useState(false); // For yearly/monthly toggle
+
+    // Sample trending data
+    const trendingItems = [
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
+        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
+        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
+        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "Quantum Leap", artist: "FutureSounds", genre: "Experimental Electronic", views: "723K", likes: "11K", duration: "3:55", imageUrl: "/api/placeholder/400/320" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
+        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
+        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
+        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
+        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
+        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
+        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
+        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
+        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
+        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
+        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
+        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
+        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" }
+    ];
+
+    const Collections = [
+        "Beef Diplomat - Gone", 
+        "i have a feeling Covers", 
+        "Soundclash Covers", 
+        "Stone Covers", 
+        "Dialectic (Accept It) Covers", 
+        "Once Covers"
+    ];
+
+    const plans = [
+        {
+            name: 'Free',
+            price: isYearly ? 0 : 0,
+            features: ['50 credits renew daily (10 songs/5 videos)','Non-commercial terms','No credit top ups','Shared generation queue','running jobs at once'],
+            buttonColor: 'bg-blue-500 hover:bg-blue-600',
+            
+        },
+        {
+            name: 'Pro Plan',
+            price: isYearly ? 59 : 5,
+            features: ['2,500 credits renew monthly (500 songs/250 Videos)', 'Early access to new beta features', 'General commercial terms','Optional credit top ups','Priority generation queue',' 10 running jobs at once'],
+            buttonColor: 'bg-green-500 hover:bg-green-600',
+            discount: 'Save with yearly billing (20% off)'
+        },
+        {
+            name: 'Premium Plan',
+            price: isYearly ? 130 : 12,
+            features: ['10,000 credits renew monthly (2,000 songs/1000 videos)', 'Early access to new beta features', 'General commercial terms',' Optional credit top ups', 'Priority generation queue', '10 running jobs at once'],
+            buttonColor: 'bg-green-500 hover:bg-green-600',
+            discount: 'Save with yearly billing (20% off)'
+        },
+        {
+            name: 'Enterprise',
+            price: isYearly ? 250 : 25,
+            features: ['Custom credit amounts', 'General commercial terms', 'Custom top ups',' Custom generation queue', 'More concurrent generations'],
+            buttonColor: 'bg-green-500 hover:bg-green-600',
+        }
+    ];
+
+    const itemsPerSlide = 8;
+    const totalSlides = Math.ceil(trendingItems.length / itemsPerSlide);
+
+    const nextSlide = () => {
+        setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    };
+
+    const prevSlide = () => {
+        setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+    };
+
+    const getTrendingTitle = () => {
+        const titles = {
+            global: 'Global Trending',
+            english: 'English Trending',
+            hindi: 'Hindi Trending',
+            bangali: 'Bengali Trending',
+            arabic: 'Arabic Trending',
+            korean: 'Korean Trending',
+            spanish: 'Spanish Trending',
+            chinese: 'Chinese Trending'
+        };
+        return titles[selectedLanguage] || 'Global Trending';
+    };
+
+    const getFilteredItems = () => {
+        return trendingItems;
+    };
+
+    const visibleItems = getFilteredItems().slice(
+        currentSlide * itemsPerSlide,
+        (currentSlide * itemsPerSlide) + itemsPerSlide
+    );
+
     return (
-        <div className="home-page">
-        
-        
-        {/* Hero Section */}
-        <section className="hero-section">
-            <div className="hero-content">
-            <h1>Welcome to Interdimensional Comedy & Song</h1>
-            <p>Your daily dose of intergalactic music and comedy shows.</p>
-            <button className="cta-button">Explore Now</button>
-            </div>
-        </section>
-        
-        {/* Trending Music Section */}
-        <section className="trending-section">
-            <h2>Trending Music</h2>
-            <div className="grid-container">
-            <div className="grid-item">
-                <img src={music1} alt="Album 1" />
-                <h3>Album Title 1</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music2} alt="Album 2" />
-                <h3>Album Title 2</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music1} alt="Album 3" />
-                <h3>Album Title 1</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music2} alt="Album 4" />
-                <h3>Album Title 2</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music1} alt="Album 5" />
-                <h3>Album Title 1</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music2} alt="Album 6" />
-                <h3>Album Title 2</h3>
-            </div>
-            {/* Add more items here */}
-            </div>
-        </section>
-        
-        {/* Comedy Show Section */}
-        <section className="comedy-section">
-            <h2>Comedy Shows</h2>
-            <div className="grid-container">
-            <div className="grid-item">
-                <img src={music1} alt="Comedy Show 1" />
-                <h3>Comedy Show 1</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music2} alt="Comedy Show 2" />
-                <h3>Comedy Show 2</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music1} alt="Comedy Show 3" />
-                <h3>Comedy Show 1</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music2} alt="Comedy Show 4" />
-                <h3>Comedy Show 2</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music1} alt="Comedy Show 5" />
-                <h3>Comedy Show 1</h3>
-            </div>
-            <div className="grid-item">
-                <img src={music2} alt="Comedy Show 6" />
-                <h3>Comedy Show 2</h3>
-            </div>
-            {/* Add more items here */}
-            </div>
-        </section>
-        
-        {/* Footer */}
-        
-
-                <div class="w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                    <div class="sm:hidden">
-                        <label for="tabs" class="sr-only">Select tab</label>
-                        <select id="tabs" class="bg-gray-50 border-0 border-b border-gray-200 text-gray-900 text-sm rounded-t-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option>Statistics</option>
-                            <option>Services</option>
-                            <option>FAQ</option>
-                        </select>
+        <div className="home-page bg-gray-900 text-white min-h-screen">
+            {/* Hero Section */}
+            <section className="hero-section py-16 bg-gradient-to-br from-blue-600 to-purple-800">
+                <div className="container mx-auto px-4 text-center">
+                    <div className="hero-content max-w-3xl mx-auto">
+                        <h1 className="text-5xl font-bold mb-4">Welcome to Interdimensional Comedy & Song</h1>
+                        <p className="text-lg mb-8">Your daily dose of intergalactic music and comedy shows.</p>
+                        <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                            Log in
+                        </button>
                     </div>
-                    <ul class="hidden text-sm font-medium text-center text-gray-500 divide-x divide-gray-200 rounded-lg sm:flex dark:divide-gray-600 dark:text-gray-400 rtl:divide-x-reverse" id="fullWidthTab" data-tabs-toggle="#fullWidthTabContent" role="tablist">
-                        <li class="w-full">
-                            <button id="stats-tab" data-tabs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="true" class="inline-block w-full p-4 rounded-ss-lg bg-gray-50 hover:bg-gray-100 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600">Statistics</button>
-                        </li>
-                        <li class="w-full">
-                            <button id="about-tab" data-tabs-target="#about" type="button" role="tab" aria-controls="about" aria-selected="false" class="inline-block w-full p-4 bg-gray-50 hover:bg-gray-100 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600">Services</button>
-                        </li>
-                        <li class="w-full">
-                            <button id="faq-tab" data-tabs-target="#faq" type="button" role="tab" aria-controls="faq" aria-selected="false" class="inline-block w-full p-4 rounded-se-lg bg-gray-50 hover:bg-gray-100 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600">FAQ</button>
-                        </li>
-                    </ul>
-                    <div id="fullWidthTabContent" class="border-t border-gray-200 dark:border-gray-600">
-                        <div class="hidden p-4 bg-white rounded-lg md:p-8 dark:bg-gray-800" id="stats" role="tabpanel" aria-labelledby="stats-tab">
-                            <dl class="grid max-w-screen-xl grid-cols-2 gap-8 p-4 mx-auto text-gray-900 sm:grid-cols-3 xl:grid-cols-6 dark:text-white sm:p-8">
-                                <div class="flex flex-col items-center justify-center">
-                                    <dt class="mb-2 text-3xl font-extrabold">73M+</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">Developers</dd>
-                                </div>
-                                <div class="flex flex-col items-center justify-center">
-                                    <dt class="mb-2 text-3xl font-extrabold">100M+</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">Public repositories</dd>
-                                </div>
-                                <div class="flex flex-col items-center justify-center">
-                                    <dt class="mb-2 text-3xl font-extrabold">1000s</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">Open source projects</dd>
-                                </div>
-                                <div class="flex flex-col items-center justify-center">
-                                    <dt class="mb-2 text-3xl font-extrabold">1B+</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">Contributors</dd>
-                                </div>
-                                <div class="flex flex-col items-center justify-center">
-                                    <dt class="mb-2 text-3xl font-extrabold">90+</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">Top Forbes companies</dd>
-                                </div>
-                                <div class="flex flex-col items-center justify-center">
-                                    <dt class="mb-2 text-3xl font-extrabold">4M+</dt>
-                                    <dd class="text-gray-500 dark:text-gray-400">Organizations</dd>
-                                </div>
-                            </dl>
+                </div>
+            </section>
+
+            {/* Title for Song Section */}
+            <section className="song-section text-center">
+                <h2 className="text-4xl font-bold mb-4 pt-8">Top Songs</h2>
+            </section>
+
+            {/* Global Trending Section */}
+            <section className="global-trending-section py-12">
+                <div className="container mx-auto">
+                    <div className="px-8 flex items-center justify-between mb-8">
+                        <h2 className="text-4xl font-bold">{getTrendingTitle()}</h2>
+                        <div className="flex gap-4">
+                            <select 
+                                value={selectedLanguage} 
+                                onChange={(e) => setSelectedLanguage(e.target.value)}
+                                className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                            >
+                                <option value="global">Global</option>
+                                <option value="english">English</option>
+                                <option value="hindi">Hindi</option>
+                                <option value="bangali">Bengali</option>
+                                <option value="arabic">Arabic</option>
+                                <option value="korean">Korean</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="chinese">Chinese</option>
+                            </select>
+                            <select 
+                                value={selectedTimeframe} 
+                                onChange={(e) => setSelectedTimeframe(e.target.value)}
+                                className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                            >
+                                <option value="all-time">All Time</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                            </select>
                         </div>
-                        <div class="hidden p-4 bg-white rounded-lg md:p-8 dark:bg-gray-800" id="about" role="tabpanel" aria-labelledby="about-tab">
-                            <h2 class="mb-5 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">We invest in the world’s potential</h2>
-                            {/* List */}
-                            <ul  class="space-y-4 text-gray-500 dark:text-gray-400">
-                                <li class="flex space-x-2 rtl:space-x-reverse items-center">
-                                    <svg class="flex-shrink-0 w-3.5 h-3.5 text-blue-600 dark:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                                    </svg>
-                                    <span class="leading-tight">Dynamic reports and dashboards</span>
-                                </li>
-                                <li class="flex space-x-2 rtl:space-x-reverse items-center">
-                                    <svg class="flex-shrink-0 w-3.5 h-3.5 text-blue-600 dark:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                                    </svg>
-                                    <span class="leading-tight">Templates for everyone</span>
-                                </li>
-                                <li class="flex space-x-2 rtl:space-x-reverse items-center">
-                                    <svg class="flex-shrink-0 w-3.5 h-3.5 text-blue-600 dark:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                                    </svg>
-                                    <span class="leading-tight">Development workflow</span>
-                                </li>
-                                <li class="flex space-x-2 rtl:space-x-reverse items-center">
-                                    <svg class="flex-shrink-0 w-3.5 h-3.5 text-blue-600 dark:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                                    </svg>
-                                    <span class="leading-tight">Limitless business automation</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="hidden p-4 bg-white rounded-lg dark:bg-gray-800" id="faq" role="tabpanel" aria-labelledby="faq-tab">
-                            <div id="accordion-flush" data-accordion="collapse" data-active-classes="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" data-inactive-classes="text-gray-500 dark:text-gray-400">
-                                <h2 id="accordion-flush-heading-1">
-                                    <button type="button" class="flex items-center justify-between w-full py-5 font-medium text-left rtl:text-right text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400" data-accordion-target="#accordion-flush-body-1" aria-expanded="true" aria-controls="accordion-flush-body-1">
-                                    <span>What is Flowbite?</span>
-                                    <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
-                                    </svg>
-                                    </button>
-                                </h2>
-                                <div id="accordion-flush-body-1" class="hidden" aria-labelledby="accordion-flush-heading-1">
-                                    <div class="py-5 border-b border-gray-200 dark:border-gray-700">
-                                    <p class="mb-2 text-gray-500 dark:text-gray-400">Flowbite is an open-source library of interactive components built on top of Tailwind CSS including buttons, dropdowns, modals, navbars, and more.</p>
-                                    <p class="text-gray-500 dark:text-gray-400">Check out this guide to learn how to <a href="/docs/getting-started/introduction/" class="text-blue-600 dark:text-blue-500 hover:underline">get started</a> and start developing websites even faster with components on top of Tailwind CSS.</p>
+                    </div>
+                    <div className="relative px-8">
+                        <div className="flex items-center">
+                            <button 
+                                onClick={prevSlide}
+                                className="absolute left-0 z-10 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronLeft size={24} />
+                            </button>
+                            <div className="flex gap-4 transition-transform duration-300 ease-in-out overflow-hidden">
+                                {visibleItems.map((item, index) => (
+                                    <div key={index} className="trending-item bg-gray-800 rounded-lg overflow-hidden w-64">
+                                        <div className="relative">
+                                            <img src={item.imageUrl} alt={item.title} className="w-full h-40 object-cover" />
+                                            <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                                {item.duration}
+                                            </div>
+                                        </div>
+                                        <div className="p-3">
+                                            <h3 className="text-lg font-semibold mb-1 truncate">{item.title}</h3>
+                                            <p className="text-xs text-gray-400 mb-1">{item.artist}</p>
+                                            <p className="text-xs text-gray-400 mb-1">{item.genre}</p>
+                                            <p className="text-xs text-gray-400">{item.views} views • {item.likes} likes</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <h2 id="accordion-flush-heading-2">
-                                    <button type="button" class="flex items-center justify-between w-full py-5 font-medium text-left rtl:text-right text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400" data-accordion-target="#accordion-flush-body-2" aria-expanded="false" aria-controls="accordion-flush-body-2">
-                                    <span>Is there a Figma file available?</span>
-                                    <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
-                                    </svg>
-                                    </button>
-                                </h2>
-                                <div id="accordion-flush-body-2" class="hidden" aria-labelledby="accordion-flush-heading-2">
-                                    <div class="py-5 border-b border-gray-200 dark:border-gray-700">
-                                    <p class="mb-2 text-gray-500 dark:text-gray-400">Flowbite is first conceptualized and designed using the Figma software so everything you see in the library has a design equivalent in our Figma file.</p>
-                                    <p class="text-gray-500 dark:text-gray-400">Check out the <a href="https://flowbite.com/figma/" class="text-blue-600 dark:text-blue-500 hover:underline">Figma design system</a> based on the utility classes from Tailwind CSS and components from Flowbite.</p>
-                                    </div>
-                                </div>
-                                <h2 id="accordion-flush-heading-3">
-                                    <button type="button" class="flex items-center justify-between w-full py-5 font-medium text-left rtl:text-right text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400" data-accordion-target="#accordion-flush-body-3" aria-expanded="false" aria-controls="accordion-flush-body-3">
-                                    <span>What are the differences between Flowbite and Tailwind UI?</span>
-                                    <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
-                                    </svg>
-                                    </button>
-                                </h2>
-                                <div id="accordion-flush-body-3" class="hidden" aria-labelledby="accordion-flush-heading-3">
-                                    <div class="py-5 border-b border-gray-200 dark:border-gray-700">
-                                    <p class="mb-2 text-gray-500 dark:text-gray-400">The main difference is that the core components from Flowbite are open source under the MIT license, whereas Tailwind UI is a paid product. Another difference is that Flowbite relies on smaller and standalone components, whereas Tailwind UI offers sections of pages.</p>
-                                    <p class="mb-2 text-gray-500 dark:text-gray-400">However, we actually recommend using both Flowbite, Flowbite Pro, and even Tailwind UI as there is no technical reason stopping you from using the best of two worlds.</p>
-                                    <p class="mb-2 text-gray-500 dark:text-gray-400">Learn more about these technologies:</p>
-                                    <ul class="ps-5 text-gray-500 list-disc dark:text-gray-400">
-                                        <li><a href="https://flowbite.com/pro/" class="text-blue-600 dark:text-blue-500 hover:underline">Flowbite Pro</a></li>
-                                        <li><a href="https://tailwindui.com/" rel="nofollow" class="text-blue-600 dark:text-blue-500 hover:underline">Tailwind UI</a></li>
-                                    </ul>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
+                            <button 
+                                onClick={nextSlide}
+                                className="absolute right-0 z-10 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronRight size={24} />
+                            </button>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                
-
-                <div class="grid mb-8 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-12 md:grid-cols-2 bg-white dark:bg-gray-800">
-                    <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e dark:bg-gray-800 dark:border-gray-700">
-                        <blockquote class="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 dark:text-gray-400">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Very easy this was to integrate</h3>
-                            <p class="my-4">If you care for your time, I hands down would go with this."</p>
-                        </blockquote>
-                        <figcaption class="flex items-center justify-center ">
-                            <img class="rounded-full w-9 h-9" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/karen-nelson.png" alt="profile "/>
-                            <div class="space-y-0.5 font-medium dark:text-white text-left rtl:text-right ms-3">
-                                <div>Bonnie Green</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400 ">Developer at Open AI</div>
+            {/* Collection Section */}
+            <section className="Collection-section py-12 bg-gray-800">
+                <div className="container mx-auto px-4">
+                    <h2 className="text-4xl font-bold text-center mb-8">Collection</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                        {Collections.map((cover, index) => (
+                            <div key={index} className="bg-gray-700 rounded-lg p-4 text-center hover:bg-gray-600 transition duration-300">
+                                <p className="text-sm">{cover}</p>
                             </div>
-                        </figcaption>    
-                    </figure>
-                    <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 md:rounded-se-lg dark:bg-gray-800 dark:border-gray-700">
-                        <blockquote class="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 dark:text-gray-400">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Solid foundation for any project</h3>
-                            <p class="my-4">Designing with Figma components that can be easily translated to the utility classes of Tailwind CSS is a huge timesaver!"</p>
-                        </blockquote>
-                        <figcaption class="flex items-center justify-center ">
-                            <img class="rounded-full w-9 h-9" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/roberta-casas.png" alt="profile "/>
-                            <div class="space-y-0.5 font-medium dark:text-white text-left rtl:text-right ms-3">
-                                <div>Roberta Casas</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">Lead designer at Dropbox</div>
-                            </div>
-                        </figcaption>    
-                    </figure>
-                    <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 md:rounded-es-lg md:border-b-0 md:border-e dark:bg-gray-800 dark:border-gray-700">
-                        <blockquote class="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 dark:text-gray-400">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Mindblowing workflow</h3>
-                            <p class="my-4">Aesthetically, the well designed components are beautiful and will undoubtedly level up your next application."</p>
-                        </blockquote>
-                        <figcaption class="flex items-center justify-center ">
-                            <img class="rounded-full w-9 h-9" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png" alt="profile "/>
-                            <div class="space-y-0.5 font-medium dark:text-white text-left rtl:text-right ms-3">
-                                <div>Jese Leos</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">Software Engineer at Facebook</div>
-                            </div>
-                        </figcaption>    
-                    </figure>
-                    <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-gray-200 rounded-b-lg md:rounded-se-lg dark:bg-gray-800 dark:border-gray-700">
-                        <blockquote class="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 dark:text-gray-400">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Efficient Collaborating</h3>
-                            <p class="my-4">You have many examples that can be used to create a fast prototype for your team."</p>
-                        </blockquote>
-                        <figcaption class="flex items-center justify-center ">
-                            <img class="rounded-full w-9 h-9" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/joseph-mcfall.png" alt="profile " />
-                            <div class="space-y-0.5 font-medium dark:text-white text-left rtl:text-right ms-3">
-                                <div>Joseph McFall</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">CTO at Google</div>
-                            </div>
-                        </figcaption>    
-                    </figure>
+                        ))}
+                    </div>
                 </div>
+            </section>
 
+            {/* Title for Comedy Section */}
+            <section className="trending-comedy-section  text-center ">
+                <h2 className="text-4xl font-bold mb-4 pt-8">Top Comedy Shows</h2>
+            </section>
 
+            {/* Global Trending Section */}
+            <section className="global-trending-section py-12">
+                <div className="container mx-auto">
+                    <div className="px-8 flex items-center justify-between mb-8">
+                        <h2 className="text-4xl font-bold">{getTrendingTitle()}</h2>
+                        <div className="flex gap-4">
+                            <select 
+                                value={selectedLanguage} 
+                                onChange={(e) => setSelectedLanguage(e.target.value)}
+                                className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                            >
+                                <option value="global">Global</option>
+                                <option value="english">English</option>
+                                <option value="hindi">Hindi</option>
+                                <option value="bangali">Bengali</option>
+                                <option value="arabic">Arabic</option>
+                                <option value="korean">Korean</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="chinese">Chinese</option>
+                            </select>
+                            <select 
+                                value={selectedTimeframe} 
+                                onChange={(e) => setSelectedTimeframe(e.target.value)}
+                                className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                            >
+                                <option value="all-time">All Time</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="relative px-8">
+                        <div className="flex items-center">
+                            <button 
+                                onClick={prevSlide}
+                                className="absolute left-0 z-10 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronLeft size={24} />
+                            </button>
+                            <div className="flex gap-4 transition-transform duration-300 ease-in-out overflow-hidden">
+                                {visibleItems.map((item, index) => (
+                                    <div key={index} className="trending-item bg-gray-800 rounded-lg overflow-hidden w-64">
+                                        <div className="relative">
+                                            <img src={item.imageUrl} alt={item.title} className="w-full h-40 object-cover" />
+                                            <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                                {item.duration}
+                                            </div>
+                                        </div>
+                                        <div className="p-3">
+                                            <h3 className="text-lg font-semibold mb-1 truncate">{item.title}</h3>
+                                            <p className="text-xs text-gray-400 mb-1">{item.artist}</p>
+                                            <p className="text-xs text-gray-400 mb-1">{item.genre}</p>
+                                            <p className="text-xs text-gray-400">{item.views} views • {item.likes} likes</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button 
+                                onClick={nextSlide}
+                                className="absolute right-0 z-10 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
+                            >
+                                <ChevronRight size={24} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/*Covers Section */}
+            <section className="Collection-section py-12 bg-gray-800">
+                <div className="container mx-auto px-4">
+                    <h2 className="text-4xl font-bold text-center mb-8">Comedy Collection</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                        {Collections.map((cover, index) => (
+                            <div key={index} className="bg-gray-700 rounded-lg p-4 text-center hover:bg-gray-600 transition duration-300">
+                                <p className="text-sm">{cover}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Pricing Section */}
+            <section className="pricing-section py-12">
+                <div className="container mx-auto text-center">
+                    <h2 className="text-4xl font-bold mb-8">Pricing Plans</h2>
+                    <div className="flex justify-center mb-4">
+                        <button 
+                            onClick={() => setIsYearly(false)} 
+                            className={`px-4 py-2 rounded-l-lg ${!isYearly ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-400'}`}
+                        >
+                            Monthly
+                        </button>
+                        <button 
+                            onClick={() => setIsYearly(true)} 
+                            className={`px-4 py-2 rounded-r-lg ${isYearly ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-400'}`}
+                        >
+                            Yearly
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {plans.map((plan, index) => (
+                            <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg">
+                                <h3 className="text-2xl font-bold mb-4">{plan.name}</h3>
+                                <p className="text-4xl font-bold mb-4">${plan.price}</p>
+                                <button className={`w-full py-2 rounded-lg ${plan.buttonColor}`}>
+                                    Choose Plan
+                                </button>
+                                <p className="text-xs no-underline hover:underline white mt-2 font-bold">{plan.discount}</p>
+                                <ul className="mb-4">
+                                    {plan.features.map((feature, idx) => (
+                                        <li key={idx} className="text-gray-400 mb-2">{feature}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
         </div>
     );
-}
+};
 
 export default Home;

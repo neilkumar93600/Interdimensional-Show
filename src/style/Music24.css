@@ -1,0 +1,564 @@
+.diskContainer {
+    display: flex;
+    align-items: center;
+    width: 1000px;
+    height: 1000px
+}
+
+@keyframes rotateDisk {
+    0% {
+        transform: rotate(0deg)
+    }
+
+    to {
+        transform: rotate(1turn)
+    }
+}
+
+@keyframes barScaleDramatic1 {
+    0%,to {
+        transform: scaleY(1)
+    }
+
+    50% {
+        transform: scaleY(2)
+    }
+}
+
+@keyframes barScaleDramatic2 {
+    0%,to {
+        transform: scaleY(1)
+    }
+
+    50% {
+        transform: scaleY(1.8)
+    }
+}
+
+@keyframes barScaleDramatic3 {
+    0%,to {
+        transform: scaleY(1)
+    }
+
+    50% {
+        transform: scaleY(2.2)
+    }
+}
+
+@keyframes barScaleDramatic4 {
+    0%,to {
+        transform: scaleY(1)
+    }
+
+    50% {
+        transform: scaleY(1.9)
+    }
+}
+
+.bar1,.bar2,.bar3,.bar4 {
+    transform-origin: bottom
+}
+
+.bar1 {
+    animation: barScaleDramatic1 .8s ease-in-out infinite
+}
+
+.bar2 {
+    animation: barScaleDramatic2 1s ease-in-out infinite
+}
+
+.bar3 {
+    animation: barScaleDramatic3 .7s ease-in-out infinite
+}
+
+.bar4 {
+    animation: barScaleDramatic4 .9s ease-in-out infinite
+}
+
+.musicPlayerModal {
+    max-width: 400px;
+    height: 180px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: #1b1b39;
+    padding: 34px;
+    border-radius: 10px;
+    background-clip: padding-box
+}
+
+.musicPlayerModal:before {
+    content: var(--before-content,"");
+    position: absolute;
+    z-index: -1;
+    background-image: linear-gradient(85deg,#da214a 15.2%,#8936f0 88.5%)!important;
+    border-radius: 12px
+}
+
+.musicPlayerHeader {
+    font-size: 14px
+}
+
+.musicPlayerHeader,.musicPlayerHeaderBeforeRoll {
+    color: #fff;
+    margin-bottom: 10px;
+    font-family: Roobert
+}
+
+.musicPlayerHeaderBeforeRoll {
+    font-size: 20px
+}
+
+.outerMusicPlayerControls {
+    display: flex;
+    margin-bottom: 20px;
+    justify-content: center;
+    gap: 45px;
+    align-items: center
+}
+
+.musicPlayerControls {
+    display: flex;
+    gap: 16px;
+    align-items: center
+}
+
+.playPauseButton {
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    transition: background-color .3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+.nextSongButton,.prevSongButton {
+    border: 1px solid #e7e6e1;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-size: 40%;
+    background-repeat: no-repeat
+}
+
+.soundButton {
+    background-size: 70%;
+    background-color: "transparent";
+    color: #c9c8c4
+}
+
+.diceButton,.soundButton {
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat
+}
+
+.diceButton {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Union.svg),linear-gradient(224deg,#8936f0 10.85%,#da214a 87.55%)!important;
+    background-position: 50%;
+    background-size: 45%,cover
+}
+
+.prevSongButton {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Previous.svg)
+}
+
+.nextSongButton {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Next.svg)
+}
+
+.diceButton {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Union.svg)
+}
+
+.soundButton {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Mute.svg)
+}
+
+.diceButton,.nextSongButton,.playPauseButton,.prevSongButton,.soundButton {
+    background-position: 50%
+}
+
+.musicPlayerProgress {
+    width: 100%;
+    height: 5px;
+    background: hsla(0,0%,100%,.1);
+    position: relative;
+    border-radius: 2.5px
+}
+
+.musicPlayerProgressBar {
+    width: 50%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 2.5px
+}
+
+.dotIndicators {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+    margin-bottom: -10px
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin: 0 5px
+}
+
+.dot.active {
+    background-color: #ff44ec
+}
+
+.hoverDot {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #fff;
+    transform: translate(-50%,-50%);
+    z-index: 2;
+    cursor: pointer
+}
+
+.headerBanner {
+    text-align: center;
+    text-wrap: wrap;
+    max-width: 400px;
+    padding: 30px
+}
+
+.headerText {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    font-family: Roobert-SemiMono;
+    font-weight: 700;
+    color: #fff
+}
+
+.headerSubText {
+    font-size: 1rem;
+    margin-bottom: .5rem;
+    font-family: Roobert;
+    font-weight: 300;
+    color: hsla(0,0%,100%,.4)
+}
+
+.highlight {
+    background: linear-gradient(86deg,#da214a 7.36%,#8936f0 94.67%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline
+}
+
+.highlight,.linkButton {
+    animation: moveGradient 3s linear infinite
+}
+
+.linkButton {
+    background: linear-gradient(86deg,#da214a 5.1%,#8936f0 95.55%);
+    background-size: 200% 200%;
+    color: #fff;
+    border-radius: 5px;
+    font-family: Roobert;
+    font-weight: medium;
+    font-size: 16px;
+    padding: 10px;
+    margin-top: 30px;
+    max-width: 400px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color .3s ease
+}
+
+.linkButton:hover {
+    background: linear-gradient(186deg,#da214a 5.1%,#8936f0 95.55%)
+}
+
+.musicPlayerModalMobile {
+    bottom: 0;
+    width: 300px;
+    max-width: 320px;
+    height: 90px;
+    padding: 10px;
+    background: #1b1b39;
+    border-radius: 10px;
+    box-shadow: 0 4px 28px rgba(0,0,0,.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    background-clip: padding-box
+}
+
+.musicPlayerModalMobile:before {
+    content: var(--before-content,"");
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    z-index: -1;
+    background-image: linear-gradient(85deg,#da214a 15.2%,#8936f0 88.5%);
+    border-radius: 12px
+}
+
+.outerMusicPlayerControlsMobile {
+    display: flex;
+    gap: 35px;
+    align-items: center
+}
+
+.musicPlayerControlsMobile {
+    display: flex;
+    gap: 16px;
+    align-items: center
+}
+
+.playPauseButtonMobile {
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    transition: background-color .3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+.nextSongButtonMobile,.prevSongButtonMobile {
+    border: 1px solid #e7e6e1;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-size: 40%;
+    background-repeat: no-repeat
+}
+
+.soundButtonMobile {
+    background-size: 70%;
+    background-color: "transparent";
+    color: #c9c8c4
+}
+
+.diceButtonMobile,.soundButtonMobile {
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat
+}
+
+.diceButtonMobile {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Union.svg),linear-gradient(85deg,#da214a 15.2%,#8936f0 88.5%)!important;
+    background-position: 50%;
+    background-size: 45%,cover
+}
+
+.prevSongButtonMobile {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Previous.svg)
+}
+
+.nextSongButtonMobile {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Next.svg)
+}
+
+.diceButtonMobile {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Union.svg)
+}
+
+.soundButtonMobile {
+    background-image: url(https://cdn1.suno.ai/groove-assets/public/icons/Mute.svg)
+}
+
+.diceButtonMobile,.nextSongButtonMobile,.playPauseButtonMobile,.prevSongButtonMobile,.soundButtonMobile {
+    background-position: 50%
+}
+
+.musicPlayerProgressMobile {
+    width: 100%;
+    height: 5px;
+    background: hsla(0,0%,100%,.1);
+    position: relative;
+    margin-top: 12px;
+    border-radius: 2.5px
+}
+
+.musicPlayerProgressBarMobile {
+    width: 50%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 2.5px
+}
+
+.dotIndicatorsMobile {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px
+}
+
+.dotMobile {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin: 0 4px
+}
+
+.dotMobile.active {
+    background-color: #ff44ec
+}
+
+.hoverDotMobile {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #fff;
+    transform: translate(-50%,-50%);
+    z-index: 2;
+    cursor: pointer
+}
+
+.headerBannerMobile {
+    text-align: center;
+    background: linear-gradient(0deg,rgba(32,32,47,0),rgba(32,32,47,.8) 5%,#20202f 10%,#20202f 30%,#20202f 50%,#20202f 70%,#20202f 90%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 300px;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column
+}
+
+.headerBannerMobile.collapsed {
+    height: 110px;
+    overflow: hidden;
+    transition: height .3s
+}
+
+.headerBannerMobile.collapsed .headerSubTextMobile,.headerBannerMobile.collapsed .headerTextMobile {
+    display: none
+}
+
+.sunoButtonMobile {
+    border-radius: 5px;
+    border: 2px solid hsla(0,0%,100%,.2);
+    cursor: pointer;
+    transition: opacity .3s ease;
+    margin-bottom: 15px
+}
+
+.sunoButtonMobile img {
+    height: auto;
+    width: 100px;
+    margin-left: -5px;
+    margin-right: -5px;
+    margin-bottom: -5px
+}
+
+.sunoButtonMobile:hover {
+    opacity: .8
+}
+
+.headerTextMobile {
+    font-size: 28px;
+    margin-bottom: 1rem;
+    font-family: Roobert-SemiMono;
+    font-weight: 700;
+    color: #fff;
+    margin-left: 20px;
+    margin-right: 20px
+}
+
+.headerSubTextMobile {
+    font-size: 16px;
+    margin-bottom: .5rem;
+    font-family: Roobert;
+    font-weight: 300;
+    color: hsla(0,0%,100%,.4);
+    margin-left: 20px;
+    margin-right: 20px
+}
+
+.linkButtonMobile {
+    background: linear-gradient(86deg,#da214a 5.1%,#8936f0 95.55%);
+    background-size: 200% 200%;
+    color: #fff;
+    border-radius: 5px;
+    font-family: Roobert;
+    font-weight: medium;
+    font-size: 16px;
+    padding: 10px;
+    margin-top: 10px;
+    max-width: 302px;
+    width: 302px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color .3s ease;
+    z-index: 9999;
+    animation: moveGradient 3s linear infinite
+}
+
+.linkButtonMobile:hover {
+    background: linear-gradient(186deg,#da214a 5.1%,#8936f0 95.55%)
+}
+
+.currentlyListeningMobile {
+    font-size: 12px;
+    margin-bottom: .5rem;
+    margin-top: 12px;
+    font-family: Roobert;
+    font-weight: 300;
+    color: #fff
+}
+
+@keyframes moveGradient {
+    0% {
+        background-position: 0 50%
+    }
+
+    50% {
+        background-position: 100% 50%
+    }
+
+    to {
+        background-position: 0 50%
+    }
+}
+
+.highlightMobile {
+    background: linear-gradient(86deg,#da214a 7.36%,#8936f0 94.67%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline;
+    animation: moveGradient 3s linear infinite
+}
+

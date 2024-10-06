@@ -56,15 +56,14 @@ const Music = () => {
             <p className="font-semibold text-gray-600 mb-2">Mode</p>
             <div className="flex items-center space-x-4">
               <button
-                className={`py-2 px-4 rounded-lg ${mode === 'custom' ? 'bg-purple-600 text-white' : 'bg-gray-700'}`}
+                className={`py-2 px-4 rounded-lg ${mode === 'custom' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300'}`}
                 onClick={() => handleModeChange('custom')}
               >
                 Custom
               </button>
               <button
-                className={`py-2 px-4 rounded-lg ${mode === 'instrumental' ? 'bg-purple-600 text-white' : 'bg-gray-700'}`}
-                onClick={() => handleModeChange('instrumental')}
-              >
+                className={`py-2 px-4 rounded-lg ${mode === 'instrumental' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300'}`}
+                onClick={() => handleModeChange('instrumental')}>
                 Instrumental
               </button>
             </div>

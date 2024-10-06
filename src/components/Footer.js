@@ -2,8 +2,8 @@ import React from 'react';
 
 function Footer() {
     return (
-        <footer className="bg-white dark:bg-gray-900">
-        <div className="mx-auto w-full max-w-screen-xl">
+        <footer className="bg-white dark:bg-gray-700">
+        <div className="mx-auto w-full ">
             <div className="grid grid-cols-2 gap-8 px-4 py-6 lg:py-8 md:grid-cols-4">
             {/* Company Section */}
             <div>
@@ -69,18 +69,13 @@ function Footer() {
                 <li className="mb-4">
                     <a href="/android" className="hover:underline">Android</a>
                 </li>
-                <li className="mb-4">
-                    <a href="/windows" className="hover:underline">Windows</a>
-                </li>
-                <li className="mb-4">
-                    <a href="/macos" className="hover:underline">MacOS</a>
-                </li>
+                
                 </ul>
             </div>
             </div>
 
             {/* Footer Bottom Section */}
-            <div className="px-4 py-6 bg-gray-100 dark:bg-gray-700 md:flex md:items-center md:justify-between">
+            <div className="px-4 py-6 bg-gray-100 dark:bg-gray-800 md:flex md:items-center md:justify-between">
             <span className="text-sm text-gray-500 dark:text-gray-300 sm:text-center">
                 &copy; 2024 Interdimensional Comedy & Song. All Rights Reserved.
             </span>

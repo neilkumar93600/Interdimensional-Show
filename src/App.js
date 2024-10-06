@@ -5,24 +5,24 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Music from './pages/Music';
 import ComedyShow from './pages/ComedyShow';
-import Mixes from './pages/Mixes';
-import NewReleases from './pages/NewReleases';
-import Library from './pages/Library';
 import TwentyFourHourShow from './pages/TwentyFourHourShow';
+import ForgetPassword from './pages/ForgotPassword';
+import Signup from './pages/Signup';
+import Music24 from './pages/Music24';
 
 function App() {
   return (
     <Router>
-      <div style={{ backgroundColor: '#121212', minHeight: '100vh', color: 'white' }}>
+      <div>
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/music" element={<Music />} />
           <Route path="/comedy" element={<ComedyShow />} />
-          <Route path="/mixes" element={<Mixes />} />
-          <Route path="/new-releases" element={<NewReleases />} />
-          <Route path="/library" element={<Library />} />
           <Route path="/24h-show" element={<TwentyFourHourShow />} />
+          <Route path="/forgetpassword" element={<ForgetPassword />} />
+          <Route path="/register" element={<Signup />} />
+          <Route path="/Music24" element={<Music24 />} />
         </Routes>
         <Footer />
       </div>
