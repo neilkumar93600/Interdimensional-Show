@@ -2,27 +2,32 @@
   "name": "interdimensional-show",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://neilkumar93600.github.io/Interdimensional-Show",
   "dependencies": {
+    "@clerk/clerk-react": "^5.9.4",
     "@google/generative-ai": "^0.19.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.7",
+    "lucide-react": "^0.445.0",
+    "node-fetch": "^2.7.0",
+    "openai": "^4.67.1",
     "react": "^18.3.1",
     "react-audio-player": "^0.17.0",
     "react-dom": "^18.3.1",
+    "react-icons": "^5.3.0",
+    "react-owl-carousel": "^2.3.3",
     "react-router-dom": "^6.26.2",
     "react-scripts": "^5.0.1",
+    "suno-deno": "^0.7.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
