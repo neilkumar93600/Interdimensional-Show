@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { PaperclipIcon, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { PaperclipIcon, Loader2} from 'lucide-react';
 import { 
   Alert,
   AlertDescription 
-} from '../components/ui/alert';
+} from '../components/ui/alert'; // Corrected import path for Alert
 
 // Custom Toggle Switch component
 const ToggleSwitch = ({ isOn, handleToggle }) => {
@@ -30,56 +30,6 @@ const ToggleSwitch = ({ isOn, handleToggle }) => {
       </div>
     </label>
   );
-};
-
-// Helper function to convert base64 to blob
-const base64ToBlob = (base64) => {
-  const parts = base64.split(';base64,');
-  const contentType = parts[0].split(':')[1];
-  const raw = window.atob(parts[1]);
-  const rawLength = raw.length;
-  const uInt8Array = new Uint8Array(rawLength);
-  
-  for (let i = 0; i < rawLength; ++i) {
-    uInt8Array[i] = raw.charCodeAt(i);
-  }
-  
-  return new Blob([uInt8Array], { type: contentType });
-};
-
-const checkIfHuman = async (base64Image) => {
-  try {
-    const blob = base64ToBlob(base64Image);
-    const formData = new FormData();
-    formData.append('image', blob);
-
-    const response = await fetch('https://YOUR_AZURE_ENDPOINT/vision/v3.2/analyze?visualFeatures=Objects,Faces', {
-      method: 'POST',
-      headers: {
-        'Ocp-Apim-Subscription-Key': process.env.REACT_APP_AZURE_API_KEY
-      },
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to analyze image');
-    }
-
-    const data = await response.json();
-    
-    const hasHuman = data.objects?.some(obj => 
-      ['person', 'man', 'woman', 'child', 'human'].includes(obj.object.toLowerCase())
-    ) || data.faces?.length > 0;
-
-    if (!hasHuman) {
-      throw new Error('No human detected in the image. Please upload an image containing a person.');
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error in human detection:', error);
-    throw new Error(error.message || 'Failed to process image');
-  }
 };
 
 const analyzeImage = async (base64Image) => {
@@ -125,6 +75,83 @@ const analyzeImage = async (base64Image) => {
   }
 };
 
+const generateVideo = async (script, characterImage) => {
+  const createTalkUrl = 'https://api.d-id.com/talks';
+  const headers = {
+    accept: 'application/json',
+    'content-type': 'application/json',
+    Authorization: `Basic ${process.env.REACT_APP_D_ID_API_KEY}`,
+  };
+
+  try {
+    const createTalkResponse = await fetch(createTalkUrl, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        source_url: 'https://d-id-public-bucket.s3.us-west-2.amazonaws.com/alice.jpg', // Now characterImage is passed correctly
+        script: {
+          type: 'text',
+          subtitles: 'false',
+          provider: {
+            type: 'microsoft',
+            voice_id: 'Sara',
+            voice_config: { style: 'Cheerful' },
+          },
+          input: script,
+        },
+        config: { fluent: 'false', pad_audio: '0.0' },
+      }),
+    });
+
+    if (!createTalkResponse.ok) {
+      const errorData = await createTalkResponse.json();
+      throw new Error(errorData.message || 'Failed to create video');
+    }
+
+    const createTalkData = await createTalkResponse.json();
+
+    if (!createTalkData.id) {
+      throw new Error('Failed to create talk: No ID received');
+    }
+
+    const talkId = createTalkData.id;
+    let resultUrl = null;
+    let attempts = 0;
+    const maxAttempts = 12;
+
+    while (!resultUrl && attempts < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      attempts++;
+
+      const getTalkResponse = await fetch(`${createTalkUrl}/${talkId}`, {
+        method: 'GET',
+        headers: headers,
+      });
+
+      if (!getTalkResponse.ok) {
+        throw new Error('Failed to check video status');
+      }
+
+      const getTalkData = await getTalkResponse.json();
+
+      if (getTalkData.status === 'done' && getTalkData.result_url) {
+        resultUrl = getTalkData.result_url;
+      } else if (getTalkData.status === 'error') {
+        throw new Error(getTalkData.error?.message || 'Video generation failed');
+      }
+    }
+
+    if (!resultUrl) {
+      throw new Error('Video generation timed out');
+    }
+
+    return resultUrl;
+  } catch (error) {
+    console.error('Error generating video:', error);
+    throw new Error(`Video generation failed: ${error.message}`);
+  }
+};
+
 const ComedyShow = () => {
   const [isCustom, setIsCustom] = useState(false);
   const [theme, setTheme] = useState('Standup');
@@ -138,12 +165,13 @@ const ComedyShow = () => {
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [error, setError] = useState(null);
+  const [generatedScript, setGeneratedScript] = useState('');
 
   const handleImageUpload = async (e, type) => {
     try {
       const file = e.target.files[0];
       if (!file) return;
-      
+
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
         throw new Error('Image size should be less than 5MB');
@@ -161,22 +189,39 @@ const ComedyShow = () => {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64Image = reader.result;
-        
+
         if (type === 'character') {
-          try {
-            const isHuman = await checkIfHuman(base64Image);
-            if (isHuman) {
-              setCharacterImage(base64Image);
-              setStatusMessage('Character image uploaded successfully');
-            }
-          } catch (error) {
-            setError(error.message);
-            setCharacterImage(null);
-          }
+          setCharacterImage(base64Image);
+          setStatusMessage('Character image uploaded successfully');
         } else {
           setAdditionalImage(base64Image);
           setStatusMessage('Additional image uploaded successfully');
         }
+
+        // Now let's make the API request to the D-ID API for face detection
+        const form = new FormData();
+        form.append('file', file); // Append the image file
+
+        const url = 'https://api.d-id.com/images/face-detection';
+        const options = {
+          method: 'POST',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Basic ${process.env.REACT_APP_D_ID_API_KEY}`, // Replace with your D-ID API key
+          },
+          body: form
+        };
+
+        try {
+          const response = await fetch(url, options);
+          const json = await response.json();
+          console.log(json); // Logs the response from the D-ID API (face detection result)
+          setStatusMessage('Face detection completed successfully');
+        } catch (err) {
+          console.error('Error in face detection:', err);
+          setError('Face detection failed.');
+        }
+
         setLoading(false);
       };
 
@@ -192,74 +237,13 @@ const ComedyShow = () => {
     }
   };
 
-  const generateVideo = async (script) => {
-    const createTalkUrl = 'https://api.d-id.com/talks';
-    const headers = {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      Authorization: `Basic ${process.env.REACT_APP_D_ID_API_KEY}`,
-    };
-
-    try {
-      // Step 1: Create a talk
-      const createTalkResponse = await fetch(createTalkUrl, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({
-          source_url: characterImage,
-          script: {
-            type: 'text',
-            subtitles: 'false',
-            provider: {
-              type: 'microsoft',
-              voice_id: 'Sara',
-              voice_config: { style: 'Cheerful' },
-            },
-            input: script,
-          },
-          config: { fluent: 'false', pad_audio: '0.0' },
-        }),
-      });
-
-      const createTalkData = await createTalkResponse.json();
-
-      if (!createTalkData.id) {
-        throw new Error('Failed to create talk');
-      }
-
-      // Step 2: Poll for the talk status and get the result_url
-      const talkId = createTalkData.id;
-      let resultUrl = null;
-
-      while (!resultUrl) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-
-        const getTalkResponse = await fetch(`${createTalkUrl}/${talkId}`, {
-          method: 'GET',
-          headers: headers,
-        });
-
-        const getTalkData = await getTalkResponse.json();
-
-        if (getTalkData.status === 'done' && getTalkData.result_url) {
-          resultUrl = getTalkData.result_url;
-        } else if (getTalkData.status === 'error') {
-          throw new Error('Video generation failed');
-        }
-      }
-
-      return resultUrl;
-    } catch (error) {
-      console.error('Error generating video:', error);
-      throw new Error('Video generation failed');
-    }
-  };
-
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setStatusMessage('Processing your request...');
+    setGeneratedScript('');
+    setVideoUrl(null);
 
     try {
       if (!characterImage) {
@@ -270,7 +254,7 @@ const ComedyShow = () => {
         throw new Error('Please provide a character name');
       }
 
-      // Analyze additional image and generate script
+      setStatusMessage('Generating comedy script...');
       let scriptPrompt = `Generate a ${
         isCustom ? duration : '15 seconds'
       } ${isCustom ? theme : 'Standup'} comedy script for a ${
@@ -283,9 +267,7 @@ const ComedyShow = () => {
         scriptPrompt += ` Incorporate the following elements from the additional image: ${imageAnalysis}`;
       }
 
-      // Generate script using ChatGPT API
-      setStatusMessage('Generating script...');
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const scriptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -298,14 +280,23 @@ const ComedyShow = () => {
         }),
       });
 
-      const data = await response.json();
-      const script = data.choices[0].message.content;
+      if (!scriptResponse.ok) {
+        throw new Error('Failed to generate script');
+      }
 
-      // Generate video
+      const scriptData = await scriptResponse.json();
+      const script = scriptData.choices[0].message.content;
+      setGeneratedScript(script);
+
       setStatusMessage('Generating video...');
-      const videoUrl = await generateVideo(script);
-      setVideoUrl(videoUrl);
-      setStatusMessage('Video generated successfully!');
+      try {
+        const videoUrl = await generateVideo(script, characterImage);
+        setVideoUrl(videoUrl);
+        setStatusMessage('Video generated successfully!');
+      } catch (videoError) {
+        setError(`Unable to generate video: ${videoError.message}`);
+        setStatusMessage('Script generated successfully, but video generation failed.');
+      }
     } catch (error) {
       setError(error.message);
       console.error(error);
@@ -353,26 +344,22 @@ const ComedyShow = () => {
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-semibold">
-                Target Audience
-              </label>
+              <label className="block mb-2 text-sm font-semibold">Target Audience</label>
               <div className="flex flex-wrap gap-2">
-                {['Everyone', 'Kids', 'Teens', 'Adults', 'Seniors'].map(
-                  (item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      className={`px-4 py-2 rounded-full transition-colors ${
-                        audience === item
-                          ? 'bg-yellow-500 text-white'
-                          : 'bg-gray-600 hover:bg-gray-500'
-                      }`}
-                      onClick={() => setAudience(item)}
-                    >
-                      {item}
-                    </button>
-                  )
-                )}
+                {['Everyone', 'Kids', 'Teens', 'Adults', 'Seniors'].map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className={`px-4 py-2 rounded-full transition-colors ${
+                      audience === item
+                        ? 'bg-yellow-500 text-white'
+                        : 'bg-gray-600 hover:bg-gray-500'
+                    }`}
+                    onClick={() => setAudience(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -429,36 +416,37 @@ const ComedyShow = () => {
             </div>
           )}
         </div>
+
         {/* Additional Image Upload Section */}
-      <div>
-        <label className="block mb-2 text-sm font-semibold">Additional Context</label>
-        <div className="relative">
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
-            placeholder="Enter additional context or description for the comedy show"
-          ></textarea>
-          <label
-            htmlFor="additionalImageUpload"
-            className="absolute right-2 top-5 -translate-y-1/2 cursor-pointer"
-          >
-            <PaperclipIcon className="w-5 h-5 text-gray-400 hover:text-blue-500" />
-            <input
-              type="file"
-              id="additionalImageUpload"
-              accept="image/*"
-              onChange={(e) => handleImageUpload(e, 'additional')}
-              className="sr-only"
-            />
-          </label>
-        </div>
-        {additionalImage && (
-          <div className="mt-2 text-sm text-green-400">
-            Additional image uploaded successfully
+        <div>
+          <label className="block mb-2 text-sm font-semibold">Additional Context</label>
+          <div className="relative">
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+              placeholder="Enter additional context or description for the comedy show"
+            ></textarea>
+            <label
+              htmlFor="additionalImageUpload"
+              className="absolute right-2 top-5 -translate-y-1/2 cursor-pointer"
+            >
+              <PaperclipIcon className="w-5 h-5 text-gray-400 hover:text-blue-500" />
+              <input
+                type="file"
+                id="additionalImageUpload"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, 'additional')}
+                className="sr-only"
+              />
+            </label>
           </div>
-        )}
-      </div>
+          {additionalImage && (
+            <div className="mt-2 text-sm text-green-400">
+              Additional image uploaded successfully
+            </div>
+          )}
+        </div>
 
         {/* Submit Button */}
         <button
@@ -474,14 +462,13 @@ const ComedyShow = () => {
               Generating...
             </span>
           ) : (
-            'Generate Comedy Show'
+            'Generate Comedy Script'
           )}
         </button>
 
         {/* Error Display */}
         {error && (
           <Alert variant="error" className="mt-4">
-            <AlertCircle className="mr-2 w-5 h-5" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -489,27 +476,53 @@ const ComedyShow = () => {
         {/* Status Message */}
         {statusMessage && !error && (
           <Alert variant="info" className="mt-4">
-            <CheckCircle className="mr-2 w-5 h-5" />
             <AlertDescription>{statusMessage}</AlertDescription>
           </Alert>
         )}
       </form>
 
       {/* Output Section */}
-      <div className="w-1/2 p-6">
+      <div className="w-1/2 p-6 space-y-6">
         {loading ? (
-          <p className="text-xl font-bold">{statusMessage}</p>
-        ) : videoUrl ? (
-          <div>
-            <h3 className="text-lg font-bold mb-4">Generated Video:</h3>
-            <video
-              src={videoUrl}
-              controls
-              className="w-full rounded shadow-lg"
-            ></video>
+          <div className="flex items-center space-x-2">
+            <Loader2 className="animate-spin w-5 h-5" />
+            <p className="text-xl font-bold">{statusMessage}</p>
           </div>
         ) : (
-          <p className="text-lg">Your generated comedy show will appear here.</p>
+          <>
+            {generatedScript && (
+              <div className="bg-gray-900 p-4 rounded-md">
+                <h3 className="text-lg font-bold mb-2">Generated Script:</h3>
+                <pre className="whitespace-pre-wrap text-sm">{generatedScript}</pre>
+              </div>
+            )}
+            
+            {videoUrl ? (
+              <div>
+                <h3 className="text-lg font-bold mb-4">Generated Video:</h3>
+                <video
+                  src={videoUrl}
+                  controls
+                  className="w-full rounded shadow-lg"
+                ></video>
+              </div>
+            ) : (
+              !loading && !error && (
+                <p className="text-lg">Your generated comedy show will appear here.</p>
+              )
+            )}
+            
+            {error && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertDescription>
+                  {error}
+                  {!generatedScript && (
+                    <p className="mt-2">Please try again or contact support if the issue persists.</p>
+                  )}
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
         )}
       </div>
     </div>
