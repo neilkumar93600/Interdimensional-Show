@@ -1,19 +1,38 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  mode: 'jit',  // Enable JIT (Just-in-Time) mode for faster build
+  darkMode: ["class"],
   content: [
-    './src/**/*.{js,jsx,ts,tsx}',
+    './pages/**/*.{js,jsx}',
+    './components/**/*.{js,jsx}',
+    './app/**/*.{js,jsx}',
+    './src/**/*.{js,jsx}',
   ],
   theme: {
     extend: {
-      colors: {
-        'deep-blue': '#0B132B',
-        'dark-blue': '#1C2541',
-        'bright-pink': '#F72585',
+      keyframes: {
+        gradient: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        "accordion-down": {
+          from: { height: 0 },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 0 },
+        },
       },
-      textColor: {
-        'gradient': 'linear-gradient(45deg, #ff0080, #ff8c00)', // For text gradient
+      animation: {
+        gradient: 'gradient 15s ease infinite',
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      backgroundSize: {
+        'gradient-size': '400% 400%',
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };

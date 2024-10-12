@@ -1,36 +1,6 @@
 import React, { useState } from 'react';
-import { PaperclipIcon, Loader2} from 'lucide-react';
-import { 
-  Alert,
-  AlertDescription 
-} from '../components/ui/alert'; // Corrected import path for Alert
-
-// Custom Toggle Switch component
-const ToggleSwitch = ({ isOn, handleToggle }) => {
-  return (
-    <label className="flex items-center cursor-pointer">
-      <div className="mr-3 font-bold">Custom Options</div>
-      <div className="relative">
-        <input
-          type="checkbox"
-          className="sr-only"
-          checked={isOn}
-          onChange={handleToggle}
-        />
-        <div
-          className={`w-14 h-8 rounded-full transition-colors duration-300 ${
-            isOn ? 'bg-blue-500' : 'bg-gray-600'
-          }`}
-        ></div>
-        <div
-          className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 transform ${
-            isOn ? 'translate-x-6' : 'translate-x-0'
-          }`}
-        ></div>
-      </div>
-    </label>
-  );
-};
+import { PaperclipIcon, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '../components/ui/alert'; // Corrected import path for Alert
 
 const analyzeImage = async (base64Image) => {
   try {
@@ -48,7 +18,7 @@ const analyzeImage = async (base64Image) => {
             content: [
               {
                 type: 'text',
-                text: 'Analyze this image and describe the key elements that could be used in a comedy routine. Focus on notable objects, activities, or situations that could be funny.'
+                text: 'Analyze this image and describe the key elements that could be used in a comedy routine.'
               },
               {
                 type: 'image_url',
@@ -75,7 +45,7 @@ const analyzeImage = async (base64Image) => {
   }
 };
 
-const generateVideo = async (script, characterImage) => {
+const generateVideo = async (script) => {
   const createTalkUrl = 'https://api.d-id.com/talks';
   const headers = {
     accept: 'application/json',
@@ -88,10 +58,10 @@ const generateVideo = async (script, characterImage) => {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({
-        source_url: 'https://d-id-public-bucket.s3.us-west-2.amazonaws.com/alice.jpg', // Now characterImage is passed correctly
+        source_url: 'https://d-id-public-bucket.s3.us-west-2.amazonaws.com/alice.jpg',
         script: {
           type: 'text',
-          subtitles: 'false',
+          subtitles: 'true',
           provider: {
             type: 'microsoft',
             voice_id: 'Sara',
@@ -99,7 +69,7 @@ const generateVideo = async (script, characterImage) => {
           },
           input: script,
         },
-        config: { fluent: 'false', pad_audio: '0.0' },
+        config: { fluent: 'true', pad_audio: '0.0' },
       }),
     });
 
@@ -109,7 +79,6 @@ const generateVideo = async (script, characterImage) => {
     }
 
     const createTalkData = await createTalkResponse.json();
-
     if (!createTalkData.id) {
       throw new Error('Failed to create talk: No ID received');
     }
@@ -153,13 +122,10 @@ const generateVideo = async (script, characterImage) => {
 };
 
 const ComedyShow = () => {
-  const [isCustom, setIsCustom] = useState(false);
   const [theme, setTheme] = useState('Standup');
   const [audience, setAudience] = useState('Everyone');
   const [duration, setDuration] = useState('15 seconds');
-  const [character, setCharacter] = useState('');
   const [prompt, setPrompt] = useState('');
-  const [characterImage, setCharacterImage] = useState(null);
   const [additionalImage, setAdditionalImage] = useState(null);
   const [videoUrl, setVideoUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -167,7 +133,7 @@ const ComedyShow = () => {
   const [error, setError] = useState(null);
   const [generatedScript, setGeneratedScript] = useState('');
 
-  const handleImageUpload = async (e, type) => {
+  const handleImageUpload = async (e) => {
     try {
       const file = e.target.files[0];
       if (!file) return;
@@ -184,43 +150,13 @@ const ComedyShow = () => {
 
       setLoading(true);
       setError(null);
-      setStatusMessage(`Processing ${type} image...`);
+      setStatusMessage(`Processing image...`);
 
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64Image = reader.result;
-
-        if (type === 'character') {
-          setCharacterImage(base64Image);
-          setStatusMessage('Character image uploaded successfully');
-        } else {
-          setAdditionalImage(base64Image);
-          setStatusMessage('Additional image uploaded successfully');
-        }
-
-        // Now let's make the API request to the D-ID API for face detection
-        const form = new FormData();
-        form.append('file', file); // Append the image file
-
-        const url = 'https://api.d-id.com/images/face-detection';
-        const options = {
-          method: 'POST',
-          headers: {
-            accept: 'application/json',
-            Authorization: `Basic ${process.env.REACT_APP_D_ID_API_KEY}`, // Replace with your D-ID API key
-          },
-          body: form
-        };
-
-        try {
-          const response = await fetch(url, options);
-          const json = await response.json();
-          console.log(json); // Logs the response from the D-ID API (face detection result)
-          setStatusMessage('Face detection completed successfully');
-        } catch (err) {
-          console.error('Error in face detection:', err);
-          setError('Face detection failed.');
-        }
+        setAdditionalImage(base64Image);
+        setStatusMessage('Image uploaded successfully');
 
         setLoading(false);
       };
@@ -246,20 +182,8 @@ const ComedyShow = () => {
     setVideoUrl(null);
 
     try {
-      if (!characterImage) {
-        throw new Error('Please upload a character image');
-      }
-
-      if (!character.trim()) {
-        throw new Error('Please provide a character name');
-      }
-
       setStatusMessage('Generating comedy script...');
-      let scriptPrompt = `Generate a ${
-        isCustom ? duration : '15 seconds'
-      } ${isCustom ? theme : 'Standup'} comedy script for a ${
-        isCustom ? audience : 'Everyone'
-      } audience. The main character is ${character}. Additional context: ${prompt}`;
+      let scriptPrompt = `Generate a ${duration} ${theme} comedy script for a ${audience} audience, containing only spoken dialogue without any stage directions, character names, or audience reactions. Additional context: ${prompt}`;
 
       if (additionalImage) {
         setStatusMessage('Analyzing additional image...');
@@ -274,7 +198,7 @@ const ComedyShow = () => {
           Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4', // Upgraded GPT version
           messages: [{ role: 'user', content: scriptPrompt }],
           max_tokens: 500,
         }),
@@ -290,7 +214,7 @@ const ComedyShow = () => {
 
       setStatusMessage('Generating video...');
       try {
-        const videoUrl = await generateVideo(script, characterImage);
+        const videoUrl = await generateVideo(script);
         setVideoUrl(videoUrl);
         setStatusMessage('Video generated successfully!');
       } catch (videoError) {
@@ -312,109 +236,67 @@ const ComedyShow = () => {
         onSubmit={handleFormSubmit}
         className="w-1/2 bg-gray-900 p-6 rounded-md shadow-md space-y-6"
       >
-        {/* Custom Toggle */}
-        <div className="flex items-center justify-between">
-          <ToggleSwitch
-            isOn={isCustom}
-            handleToggle={() => setIsCustom(!isCustom)}
-          />
+        {/* Theme Selection */}
+        <div>
+          <label className="block mb-2 text-sm font-semibold">Theme</label>
+          <div className="flex flex-wrap gap-2">
+            {['Standup', 'Sketch', 'Roast', 'Musical'].map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`px-4 py-2 rounded-full transition-colors ${
+                  theme === item
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-600 hover:bg-gray-500'
+                }`}
+                onClick={() => setTheme(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Conditional Rendering for Custom Options */}
-        {isCustom && (
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-2 text-sm font-semibold">Theme</label>
-              <div className="flex flex-wrap gap-2">
-                {['Standup', 'Sketch', 'Roast', 'Musical'].map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`px-4 py-2 rounded-full transition-colors ${
-                      theme === item
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-600 hover:bg-gray-500'
-                    }`}
-                    onClick={() => setTheme(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block mb-2 text-sm font-semibold">Target Audience</label>
-              <div className="flex flex-wrap gap-2">
-                {['Everyone', 'Kids', 'Teens', 'Adults', 'Seniors'].map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`px-4 py-2 rounded-full transition-colors ${
-                      audience === item
-                        ? 'bg-yellow-500 text-white'
-                        : 'bg-gray-600 hover:bg-gray-500'
-                    }`}
-                    onClick={() => setAudience(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block mb-2 text-sm font-semibold">Duration</label>
-              <div className="flex flex-wrap gap-2">
-                {['15 seconds', '1 minute', '3 minutes', '5 minutes', '10 minutes'].map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`px-4 py-2 rounded-full transition-colors ${
-                      duration === item
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-600 hover:bg-gray-500'
-                    }`}
-                    onClick={() => setDuration(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Character Input */}
+        {/* Audience Selection */}
         <div>
-          <label className="block mb-2 text-sm font-semibold">Character</label>
-          <div className="relative">
-            <input
-              type="text"
-              value={character}
-              onChange={(e) => setCharacter(e.target.value)}
-              className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
-              placeholder="Enter character name"
-            />
-            <label
-              htmlFor="characterImageUpload"
-              className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
-            >
-              <PaperclipIcon className="w-5 h-5 text-gray-400 hover:text-blue-500" />
-              <input
-                type="file"
-                id="characterImageUpload"
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, 'character')}
-                className="sr-only"
-              />
-            </label>
+          <label className="block mb-2 text-sm font-semibold">Target Audience</label>
+          <div className="flex flex-wrap gap-2">
+            {['Everyone', 'Kids', 'Teens', 'Adults', 'Seniors'].map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`px-4 py-2 rounded-full transition-colors ${
+                  audience === item
+                    ? 'bg-yellow-500 text-white'
+                    : 'bg-gray-600 hover:bg-gray-500'
+                }`}
+                onClick={() => setAudience(item)}
+              >
+                {item}
+              </button>
+            ))}
           </div>
-          {characterImage && (
-            <div className="mt-2 text-sm text-green-400">
-              Character image uploaded successfully
-            </div>
-          )}
+        </div>
+
+        {/* Duration Selection */}
+        <div>
+          <label className="block mb-2 text-sm font-semibold">Duration</label>
+          <div className="flex flex-wrap gap-2">
+            {['15 seconds', '1 minute', '3 minutes', '5 minutes', '10 minutes'].map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`px-4 py-2 rounded-full transition-colors ${
+                  duration === item
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-600 hover:bg-gray-500'
+                }`}
+                onClick={() => setDuration(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Additional Image Upload Section */}
@@ -436,7 +318,7 @@ const ComedyShow = () => {
                 type="file"
                 id="additionalImageUpload"
                 accept="image/*"
-                onChange={(e) => handleImageUpload(e, 'additional')}
+                onChange={handleImageUpload}
                 className="sr-only"
               />
             </label>
@@ -466,6 +348,14 @@ const ComedyShow = () => {
           )}
         </button>
 
+        {/* Generated Script Display */}
+        {generatedScript && (
+          <div className="bg-gray-900 p-4 rounded-md mt-4" style={{ height: '256px', overflowY: 'auto' }}>
+            <h3 className="text-lg font-bold mb-2">Generated Script:</h3>
+            <pre className="whitespace-pre-wrap text-sm">{generatedScript}</pre>
+          </div>
+        )}
+
         {/* Error Display */}
         {error && (
           <Alert variant="error" className="mt-4">
@@ -490,13 +380,6 @@ const ComedyShow = () => {
           </div>
         ) : (
           <>
-            {generatedScript && (
-              <div className="bg-gray-900 p-4 rounded-md">
-                <h3 className="text-lg font-bold mb-2">Generated Script:</h3>
-                <pre className="whitespace-pre-wrap text-sm">{generatedScript}</pre>
-              </div>
-            )}
-            
             {videoUrl ? (
               <div>
                 <h3 className="text-lg font-bold mb-4">Generated Video:</h3>
@@ -511,7 +394,7 @@ const ComedyShow = () => {
                 <p className="text-lg">Your generated comedy show will appear here.</p>
               )
             )}
-            
+
             {error && (
               <Alert variant="destructive" className="mt-4">
                 <AlertDescription>

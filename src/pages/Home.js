@@ -123,14 +123,16 @@ const Home = () => {
     return (
         <div className="home-page bg-gray-900 text-white min-h-screen">
             {/* Hero Section */}
-            <section className="hero-section py-16 bg-gradient-to-br from-blue-600 to-purple-800">
-                <div className="container mx-auto px-4 text-center">
+            <section className="hero-section py-16 relative bg-gradient-to-br from-blue-600 to-purple-800 animate-gradient bg-gradient-size">
+                <div className="absolute inset-0 z-0 opacity-50"></div>
+                <div className="container mx-auto px-4 text-center relative z-10">
                     <div className="hero-content max-w-3xl mx-auto">
                         <h1 className="text-5xl font-bold mb-4">Welcome to Interdimensional Comedy & Song</h1>
                         <p className="text-lg mb-8">Your daily dose of intergalactic music and comedy shows.</p>
                         <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
                             Log in
                         </button>
+                        <img src="/path/to/your/image.jpg" alt="Hero visual representation" className="mt-8 mx-auto w-full max-w-md rounded-lg shadow-lg" />
                     </div>
                 </div>
             </section>
