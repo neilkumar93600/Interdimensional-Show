@@ -7,7 +7,7 @@ import Music from './pages/Music';
 import ComedyShow from './pages/ComedyShow';
 import TwentyFourHourShow from './pages/TwentyFourHourShow';
 import ForgetPassword from './pages/forgot-password';
-import Signup from './pages/Signup';
+import Signup from './pages/signup';
 import Login from './pages/login';
 // import Music24 from './pages/Music24';
 

@@ -1,61 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import {
-  AppBar, Toolbar, Typography, Container, Grid, Card, CardContent,
-  Button, IconButton, Badge, Slider, TextField, Avatar, List,
-  ListItem, ListItemText, ListItemAvatar, Chip, Dialog,
-  DialogActions, DialogContent, DialogContentText, DialogTitle
-} from '@mui/material';
-import {
-  Mic as MicIcon,
-  MusicNote as MusicNoteIcon,
-  Person as PersonIcon,
-  Favorite as FavoriteIcon,
-  Share as ShareIcon,
-  VolumeUp as VolumeUpIcon,
-  Send as SendIcon,
-  CalendarToday as CalendarTodayIcon,
-  BookOnline as BookOnlineIcon,
-  PlayArrow as PlayArrowIcon,
-  Pause as PauseIcon,
-  Public as PublicIcon
-} from '@mui/icons-material';
-import { ChakraProvider, Box, Flex, Image } from '@chakra-ui/react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#00bcd4',
-    },
-    secondary: {
-      main: '#ff4081',
-    },
-    background: {
-      default: '#0a192f',
-      paper: '#112240',
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-          backdropFilter: 'blur(4px)',
-          background: 'rgba(17, 34, 64, 0.8)',
-        },
-      },
-    },
-  },
-});
+import { 
+  FaPlay, FaPause, FaVolumeUp, FaHeart, FaShare, 
+  FaPaperPlane, FaGlobe, FaUser
+} from 'react-icons/fa';
 
 const INITIAL_STATE = {
   streams: {
@@ -116,11 +63,6 @@ const INITIAL_STATE = {
   }
 };
 
-const viewerData = Array.from({ length: 24 }, (_, i) => ({
-  hour: `${i}:00`,
-  viewers: Math.floor(Math.random() * 1000) + 200,
-}));
-
 const VideoPlayer = ({ stream, isPlaying, onPlayPause, volume, onVolumeChange }) => {
   return (
     <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
@@ -134,22 +76,28 @@ const VideoPlayer = ({ stream, isPlaying, onPlayPause, volume, onVolumeChange })
       />
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
         <div className="flex items-center space-x-4">
-          <IconButton onClick={onPlayPause} className="text-white">
-            {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-          </IconButton>
+          <button onClick={onPlayPause} className="text-white">
+            {isPlaying ? <FaPause /> : <FaPlay />}
+          </button>
           <div className="flex-1">
-            <Slider
-              value={50}
-              onChange={(_, newValue) => {}}
-              className="text-cyan-400"
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              value="50" 
+              className="w-full"
+              onChange={() => {}}
             />
           </div>
           <div className="flex items-center space-x-2">
-            <VolumeUpIcon className="text-white" />
-            <Slider
-              value={volume}
-              onChange={onVolumeChange}
+            <FaVolumeUp className="text-white" />
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              value={volume} 
               className="w-24"
+              onChange={onVolumeChange}
             />
           </div>
         </div>
@@ -192,7 +140,7 @@ const CountdownTimer = ({ nextEventTime }) => {
     }
 
     timerComponents.push(
-      <span key={interval}>
+      <span key={interval} className="text-xl font-bold">
         {timeLeft[interval]} {interval}{" "}
       </span>
     );
@@ -207,310 +155,260 @@ const CountdownTimer = ({ nextEventTime }) => {
 
 const EntertainmentHub = () => {
   const [streams, setStreams] = useState(INITIAL_STATE.streams);
-  const [activeTab, setActiveTab] = useState('comedy');
+  const [activeTab] = useState('comedy');
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(50);
   const [showGlobalMap, setShowGlobalMap] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
   const [selectedShow, setSelectedShow] = useState(null);
-
-  const handleVolumeChange = (_, newValue) => {
-    setVolume(newValue);
-  };
+  const [chatMessage, setChatMessage] = useState('');
 
   const currentStream = streams[activeTab];
 
+  const handleSendMessage = () => {
+    if (chatMessage.trim()) {
+      const newMessage = {
+        id: Date.now(),
+        user: 'You',
+        message: chatMessage,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setStreams(prevStreams => ({
+        ...prevStreams,
+        [activeTab]: {
+          ...prevStreams[activeTab],
+          chatMessages: [...prevStreams[activeTab].chatMessages, newMessage]
+        }
+      }));
+      setChatMessage('');
+    }
+  };
+
   return (
-    <ChakraProvider>
-      <ThemeProvider theme={theme}>
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-          <AppBar position="static" color="transparent" elevation={0}>
-            <Toolbar>
-              <Typography variant="h5" className="flex-grow font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                24/7 Entertainment Hub
-              </Typography>
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<PublicIcon />}
-                  onClick={() => setShowGlobalMap(!showGlobalMap)}
-                >
-                  Global View
-                </Button>
-              </div>
-            </Toolbar>
-          </AppBar>
-
-          <Container maxWidth="xl" className="py-8">
-            <Grid container spacing={4}>
-              {/* Main Content */}
-              <Grid item xs={12} lg={8}>
-                <Card>
-                  <CardContent>
-                    <VideoPlayer
-                      stream={currentStream}
-                      isPlaying={isPlaying}
-                      onPlayPause={() => setIsPlaying(!isPlaying)}
-                      volume={volume}
-                      onVolumeChange={handleVolumeChange}
-                    />
-                    
-                    <div className="mt-4 flex justify-between items-start">
-                      <div>
-                        <Typography variant="h6" className="text-white">
-                          {currentStream.currentShow.title}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Hosted by {currentStream.currentShow.host}
-                        </Typography>
-                        <div className="flex items-center space-x-2 mt-2">
-                          <Chip
-                            icon={<PersonIcon />}
-                            label={`${currentStream.activeUsers} watching`}
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                          />
-                          <Chip
-                            label="LIVE"
-                            color="error"
-                            size="small"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <IconButton>
-                          <Badge badgeContent={currentStream.currentShow.likes} color="primary">
-                            <FavoriteIcon />
-                          </Badge>
-                        </IconButton>
-                        <IconButton>
-                          <Badge badgeContent={currentStream.currentShow.shares} color="secondary">
-                            <ShareIcon />
-                          </Badge>
-                        </IconButton>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Interactive Schedule */}
-                <Card className="mt-4">
-                  <CardContent>
-                    <Typography variant="h6" className="text-cyan-400 mb-4">
-                      24/7 Schedule
-                    </Typography>
-                    <div className="flex space-x-2 overflow-x-auto pb-4">
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <div
-                          key={i}
-                          className="flex-shrink-0 w-32 h-24 bg-gray-800 rounded-lg p-2 cursor-pointer hover:bg-gray-700 transition-colors"
-                          onClick={() => {
-                            setSelectedShow({
-                              title: `Show at ${i}:00`,
-                              description: `This is the show scheduled for ${i}:00.`,
-                              preview: 'https://example.com/show-preview.mp4'
-                            });
-                            setOpenDialog(true);
-                          }}
-                        >
-                          <Typography variant="body2" className="text-white font-bold">
-                            {i}:00
-                          </Typography>
-                          <Typography variant="caption" className="text-gray-400">
-                            Show Title
-                          </Typography>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              {/* Sidebar */}
-              <Grid item xs={12} lg={4}>
-                {/* Countdown Timer */}
-                <Card className="mb-4">
-                  <CardContent>
-                    <Typography variant="h6" className="text-cyan-400 mb-4">
-                      Next Event Countdown
-                    </Typography>
-                    <CountdownTimer nextEventTime="2023-06-01T00:00:00" />
-                  </CardContent>
-                </Card>
-
-                {/* Up Next */}
-                <Card className="mb-4">
-                  <CardContent>
-                    <Typography variant="h6" className="text-cyan-400 mb-4">
-                      Up Next
-                    </Typography>
-                    <div className="flex items-center space-x-4">
-                      <div className="relative w-24 h-16 bg-gray-800 rounded-lg overflow-hidden">
-                        <video
-                          src={currentStream.upNext.trailerUrl}
-                          className="w-full h-full object-cover"
-                          autoPlay
-                          muted
-                          loop
-                        />
-                      </div>
-                      <div>
-                        <Typography variant="subtitle1" className="text-white">
-                          {currentStream.upNext.title}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {currentStream.upNext.host}
-                        </Typography>
-                        <Typography variant="body2" className="text-cyan-400">
-                          Starts at {currentStream.upNext.startTime}
-                        </Typography>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Live Chat */}
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" className="text-cyan-400 mb-4">
-                      Live Chat
-                    </Typography>
-                    <List className="h-64 overflow-y-auto mb-4">
-                      {currentStream.chatMessages.map((message) => (
-                        <ListItem key={message.id}>
-                          <ListItemAvatar>
-                            <Avatar>{message.user[0]}</Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={message.user}
-                            secondary={message.message}
-                            secondaryTypographyProps={{ style: { color: 'rgba(255,255,255,0.7)' } }}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                    <div className="flex space-x-2">
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                        placeholder="Type a message..."
-                        className="bg-black/20"
-                      />
-                      <IconButton color="primary">
-                        <SendIcon />
-                      </IconButton>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Global Audience Map */}
-                {showGlobalMap && (
-                  <Card className="mt-4">
-                    <CardContent>
-                      <Typography variant="h6" className="text-cyan-400 mb-4">
-                        Global Audience
-                      </Typography>
-                      <div className="h-64 bg-gray-900/50 rounded-lg flex items-center justify-center">
-                        <Typography variant="body1" color="textSecondary">
-                          Interactive global audience map would render here
-                        </Typography>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Show Details Dialog */}
-                <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-                  <DialogTitle>{selectedShow?.title}</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText>
-                      {selectedShow?.description}
-                    </DialogContentText>
-                    {selectedShow?.preview && (
-                      <video
-                        src={selectedShow.preview}
-                        className="w-full mt-4"
-                        controls
-                      />
-                    )}
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={() => setOpenDialog(false)}>Close</Button>
-                    <Button onClick={() => setOpenDialog(false)} color="primary">
-                      Set Reminder
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-
-                {/* Song/Show Request Feature */}
-                <Card className="mt-4">
-                  <CardContent>
-                    <Typography variant="h6" className="text-cyan-400 mb-4">
-                      Request a Song/Show
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      placeholder="Enter your request..."
-                      className="mb-2"
-                    />
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                    >
-                      Submit Request
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Customizable Stream */}
-                <Card className="mt-4">
-                  <CardContent>
-                    <Typography variant="h6" className="text-cyan-400 mb-4">
-                      Customize Your Stream
-                    </Typography>
-                    <div className="flex space-x-2">
-                      <Button variant="outlined" size="small">Upbeat</Button>
-                      <Button variant="outlined" size="small">Chill</Button>
-                      <Button variant="outlined" size="small">Funny</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Join the Show Feature */}
-                <Card className="mt-4">
-                  <CardContent>
-                    <Typography variant="h6" className="text-cyan-400 mb-4">
-                      Join the Show
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      placeholder="Submit a question or joke..."
-                      className="mb-2"
-                    />
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      fullWidth
-                    >
-                      Submit
-                    </Button>
-                  </CardContent>
-                </Card>
-
-              </Grid>
-            </Grid>
-          </Container>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white">
+      <header className="bg-transparent p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            24/7 Entertainment Hub
+          </h1>
+          <button
+            className="px-4 py-2 border border-cyan-400 text-cyan-400 rounded hover:bg-cyan-400 hover:text-black transition-colors"
+            onClick={() => setShowGlobalMap(!showGlobalMap)}
+          >
+            <FaGlobe className="inline-block mr-2" />
+            Global View
+          </button>
         </div>
-      </ThemeProvider>
-    </ChakraProvider>
+      </header>
+
+      <main className="container mx-auto py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="bg-gray-800 rounded-lg p-4">
+              <VideoPlayer
+                stream={currentStream}
+                isPlaying={isPlaying}
+                onPlayPause={() => setIsPlaying(!isPlaying)}
+                volume={volume}
+                onVolumeChange={(e) => setVolume(e.target.value)}
+              />
+              
+              <div className="mt-4 flex justify-between items-start">
+                <div>
+                  <h2 className="text-xl font-bold">
+                    {currentStream.currentShow.title}
+                  </h2>
+                  <p className="text-gray-400">
+                    Hosted by {currentStream.currentShow.host}
+                  </p>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <span className="px-2 py-1 bg-blue-500 text-white text-sm rounded-full">
+                      <FaUser className="inline-block mr-1" />
+                      {currentStream.activeUsers} watching
+                    </span>
+                    <span className="px-2 py-1 bg-red-500 text-white text-sm rounded-full">
+                      LIVE
+                    </span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="text-pink-500">
+                    <FaHeart />
+                    <span className="ml-1">{currentStream.currentShow.likes}</span>
+                  </button>
+                  <button className="text-blue-500">
+                    <FaShare />
+                    <span className="ml-1">{currentStream.currentShow.shares}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold text-cyan-400 mb-4">24/7 Schedule</h2>
+              <div className="flex space-x-2 overflow-x-auto pb-4">
+                {Array.from({ length: 24 }, (_, i) => (
+                  <div
+                    key={i}
+                    className="flex-shrink-0 w-32 h-24 bg-gray-700 rounded-lg p-2 cursor-pointer hover:bg-gray-600 transition-colors"
+                    onClick={() => {
+                      setSelectedShow({
+                        title: `Show at ${i}:00`,
+                        description: `This is the show scheduled for ${i}:00.`,
+                        preview: 'https://example.com/show-preview.mp4'
+                      });
+                      setShowDialog(true);
+                    }}
+                  >
+                    <p className="text-white font-bold">
+                      {i}:00
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      Show Title
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold text-cyan-400 mb-4">Next Event Countdown</h2>
+              <CountdownTimer nextEventTime="2023-06-01T00:00:00" />
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold text-cyan-400 mb-4">Up Next</h2>
+              <div className="flex items-center space-x-4">
+                <div className="relative w-24 h-16 bg-gray-700 rounded-lg overflow-hidden">
+                  <video
+                    src={currentStream.upNext.trailerUrl}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                  />
+                </div>
+                <div>
+                  <h3 className="font-bold">{currentStream.upNext.title}</h3>
+                  <p className="text-gray-400">{currentStream.upNext.host}</p>
+                  <p className="text-cyan-400">Starts at {currentStream.upNext.startTime}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold text-cyan-400 mb-4">Live Chat</h2>
+              <div className="h-64 overflow-y-auto mb-4 space-y-4">
+                {currentStream.chatMessages.map((message) => (
+                  <div key={message.id} className="flex items-start space-x-2">
+                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                      {message.user[0]}
+                    </div>
+                    <div>
+                      <p className="font-bold">{message.user}</p>
+                      <p className="text-gray-300">{message.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  className="flex-grow bg-gray-700 rounded px-2 py-1"
+                  placeholder="Type a message..."
+                  value={chatMessage}
+                  onChange={(e) => setChatMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+                <button 
+                  className="bg-cyan-500 text-white rounded px-3 py-1"
+                  onClick={handleSendMessage}
+                >
+                  <FaPaperPlane />
+                </button>
+              </div>
+            </div>
+
+            {showGlobalMap && (
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h2 className="text-xl font-bold text-cyan-400 mb-4">Global Audience</h2>
+                <div className="h-64 bg-gray-700 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-400">Interactive global audience map would render here</p>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold text-cyan-400 mb-4">Request a Song/Show</h2>
+              <input
+                type="text"
+                className="w-full bg-gray-700 rounded px-2 py-1 mb-2"
+                placeholder="Enter your request..."
+              />
+              <button className="w-full bg-cyan-500 text-white rounded px-3 py-1">
+                Submit Request
+              </button>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold text-cyan-400 mb-4">Customize Your Stream</h2>
+              <div className="flex space-x-2">
+                <button className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 transition-colors">Upbeat</button>
+                <button className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 transition-colors">Chill</button>
+                <button className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 transition-colors">Funny</button>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-xl font-bold text-cyan-400 mb-4">Join the Show</h2>
+              <input
+                type="text"
+                className="w-full bg-gray-700 rounded px-2 py-1 mb-2"
+                placeholder="Submit a question or joke..."
+              />
+              <button className="w-full bg-pink-500 text-white rounded px-3 py-1">
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {showDialog && selectedShow && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">{selectedShow.title}</h2>
+            <p className="text-gray-300 mb-4">{selectedShow.description}</p>
+            {selectedShow.preview && (
+              <video
+                src={selectedShow.preview}
+                className="w-full mb-4 rounded"
+                controls
+              />
+            )}
+            <div className="flex justify-end space-x-2">
+              <button 
+                className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+                onClick={() => setShowDialog(false)}
+              >
+                Close
+              </button>
+              <button 
+                className="px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 transition-colors"
+                onClick={() => {
+                  // Logic to set a reminder
+                  setShowDialog(false);
+                }}
+              >
+                Set Reminder
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

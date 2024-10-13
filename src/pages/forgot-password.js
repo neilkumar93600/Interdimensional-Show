@@ -1,51 +1,59 @@
 import React, { useState } from 'react';
-import { Box, Flex, Heading, Input, Button, Text, Link } from '@chakra-ui/react';
-import { makeStyles } from '@mui/material/styles';
-import { Link as RouterLink } from 'react-router-dom';
-
-const useStyles = makeStyles((theme) => ({
-  gradientBg: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    minHeight: '100vh',
-  },
-}));
+import { Link } from 'react-router-dom';
+import { resetPassword } from '../firebase';
 
 const ForgotPassword = () => {
-  const classes = useStyles();
-  const [email, setEmail] = useState('');
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
-  const handleResetPassword = (e) => {
-    e.preventDefault();
-    // Implement password reset logic here
-    console.log('Password reset requested for:', email);
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setMessage('');
+        setError('');
+        const result = await resetPassword(email);
+        if (result.success) {
+            setMessage('Password reset email sent. Please check your inbox.');
+        } else {
+            setError(result.error);
+        }
+    };
 
-  return (
-    <Flex className={classes.gradientBg} align="center" justify="center">
-      <Box bg="white" p={8} rounded="md" shadow="md" maxWidth="400px" width="100%">
-        <Heading as="h2" size="xl" textAlign="center" mb={6}>Forgot Password</Heading>
-        <Text textAlign="center" mb={4}>
-          Enter your email address and we'll send you a link to reset your password.
-        </Text>
-        <form onSubmit={handleResetPassword}>
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            mb={6}
-            required
-          />
-          <Button type="submit" colorScheme="blue" width="100%" mb={4}>
-            Reset Password
-          </Button>
-        </form>
-        <Text textAlign="center">
-          Remember your password? <Link as={RouterLink} to="/login" color="blue.500">Log In</Link>
-        </Text>
-      </Box>
-    </Flex>
-  );
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 animate-gradient-x">
+            <div className="bg-white p-8 rounded-lg shadow-md w-96">
+                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Forgot Password</h2>
+                {message && <p className="text-green-500 text-sm mb-4">{message}</p>}
+                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-600"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-pink-600 text-white font-bold py-2 px-4 rounded-md hover:bg-pink-700 transition duration-300"
+                    >
+                        Reset Password
+                    </button>
+                </form>
+                <div className="mt-6 text-center">
+                    <Link to="/login" className="text-pink-600 hover:text-pink-800">
+                        Back to Login
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default ForgotPassword;
