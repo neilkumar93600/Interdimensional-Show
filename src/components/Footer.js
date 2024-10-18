@@ -1,98 +1,107 @@
 import React from 'react';
-import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube, FaSpotify, FaSoundcloud } from 'react-icons/fa';
 
 function Footer() {
+    const socialLinks = [
+        { icon: <FaFacebookF />, href: '/', label: 'Facebook' },
+        { icon: <FaTwitter />, href: '/', label: 'Twitter' },
+        { icon: <FaInstagram />, href: '/', label: 'Instagram' },
+        { icon: <FaYoutube />, href: '/', label: 'YouTube' },
+        { icon: <FaSpotify />, href: '/', label: 'Spotify' },
+        { icon: <FaSoundcloud />, href: '/', label: 'SoundCloud' },
+    ];
+
+    const features = [
+        'AI-Powered Music Creation',
+        'Song Extension Technology',
+        '15-Second Comedy Reels',
+        'Live Performance Streaming',
+        'Custom Comedy Roasts',
+        'Event Production Tools'
+    ];
+
     return (
-        <footer className="bg-gray-900 text-white py-10">
-            <div className="container mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-10 mb-10">
-                    {/* Company Section */}
+        <footer className="bg-gradient-to-b from-gray-900 to-black text-white pt-16 pb-8">
+            <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                    <div className="space-y-4">
+                        <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                            Vibe Vision
+                        </h3>
+                        <p className="text-gray-400 leading-relaxed">
+                            Revolutionizing entertainment through AI-powered music creation and comedy production.
+                        </p>
+                        <div className="flex space-x-4">
+                            {socialLinks.map((social, index) => (
+                                <a
+                                    key={index}
+                                    href={social.href}
+                                    className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-purple-500 hover:text-white transition-all duration-200"
+                                    aria-label={social.label}
+                                >
+                                    {social.icon}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+
                     <div>
-                        <h2 className="text-xl font-bold mb-4">Company</h2>
+                        <h4 className="text-lg font-semibold mb-4">Features</h4>
+                        <ul className="space-y-2">
+                            {features.map((feature, index) => (
+                                <li key={index} className="text-gray-400 hover:text-purple-400 transition-colors duration-200">
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
                         <ul className="space-y-2">
                             <li>
-                                <a href="/about-us" className="hover:text-blue-400 transition duration-200">About Us</a>
+                                <Link to="/about" className="text-gray-400 hover:text-purple-400 transition-colors duration-200">
+                                    About Us
+                                </Link>
                             </li>
                             <li>
-                                <a href="/careers" className="hover:text-blue-400 transition duration-200">Careers</a>
+                                <Link to="/pricing" className="text-gray-400 hover:text-purple-400 transition-colors duration-200">
+                                    Pricing Plans
+                                </Link>
                             </li>
                             <li>
-                                <a href="/goal" className="hover:text-blue-400 transition duration-200">Our Goal</a>
+                                <Link to="/blog" className="text-gray-400 hover:text-purple-400 transition-colors duration-200">
+                                    Blog
+                                </Link>
                             </li>
                             <li>
-                                <a href="/team" className="hover:text-blue-400 transition duration-200">Our Team</a>
+                                <Link to="/contact" className="text-gray-400 hover:text-purple-400 transition-colors duration-200">
+                                    Contact Us
+                                </Link>
                             </li>
                         </ul>
                     </div>
 
-                    {/* Help Center Section */}
                     <div>
-                        <h2 className="text-xl font-bold mb-4">Help Center</h2>
-                        <ul className="space-y-2">
-                            <li>
-                                <a href="/discord" className="hover:text-blue-400 transition duration-200">Discord</a>
-                            </li>
-                            <li>
-                                <a href="/contact" className="hover:text-blue-400 transition duration-200">Contact Us</a>
-                            </li>
-                            <li>
-                                <a href="/faq" className="hover:text-blue-400 transition duration-200">FAQ</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* Legal Section */}
-                    <div>
-                        <h2 className="text-xl font-bold mb-4">Legal</h2>
-                        <ul className="space-y-2">
-                            <li>
-                                <a href="/privacy-policy" className="hover:text-blue-400 transition duration-200">Privacy Policy</a>
-                            </li>
-                            <li>
-                                <a href="/terms" className="hover:text-blue-400 transition duration-200">Terms & Conditions</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* Newsletter Section */}
-                    <div>
-                        <h2 className="text-xl font-bold mb-4">Subscribe</h2>
-                        <form className="flex">
+                        <h4 className="text-lg font-semibold mb-4">Newsletter</h4>
+                        <p className="text-gray-400 mb-4">Stay updated with our latest features and releases.</p>
+                        <form className="space-y-4">
                             <input
                                 type="email"
-                                placeholder="Your email"
-                                className="flex-1 p-2 rounded-l-md border border-gray-700 bg-gray-800 text-white placeholder-gray-400 focus:outline-none"
+                                placeholder="Enter your email"
+                                className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-purple-500"
                             />
-                            <button
-                                type="submit"
-                                className="bg-blue-600 px-4 rounded-r-md hover:bg-blue-500 transition duration-200"
-                            >
+                            <button className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 transition-all duration-200">
                                 Subscribe
                             </button>
                         </form>
                     </div>
                 </div>
 
-                {/* Footer Bottom Section */}
-                <div className="border-t border-gray-700 pt-6 flex flex-col items-center md:flex-row justify-between">
-                    <span className="text-sm text-gray-400 sm:text-center">
-                        &copy; 2024 Interdimensional Comedy & Song. All Rights Reserved.
-                    </span>
-                    <div className="flex space-x-4 mt-4 md:mt-0">
-                        {/* Social Media Icons */}
-                        <a href="https://facebook.com" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-500 transition duration-200">
-                            <Facebook className="w-6 h-6" />
-                        </a>
-                        <a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-400 transition duration-200">
-                            <Twitter className="w-6 h-6" />
-                        </a>
-                        <a href="https://instagram.com" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-pink-500 transition duration-200">
-                            <Instagram className="w-6 h-6" />
-                        </a>
-                        <a href="https://youtube.com" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-red-500 transition duration-200">
-                            <Youtube className="w-6 h-6" />
-                        </a>
-                        
+                <div className="mt-16 pt-8 border-t border-gray-800">
+                    <div className="text-center text-gray-400">
+                        <p>&copy; {new Date().getFullYear()} Vibe Vision. All rights reserved.</p>
                     </div>
                 </div>
             </div>

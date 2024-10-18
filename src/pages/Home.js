@@ -1,101 +1,116 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Music, Video, Clock, Zap, Star, Users, Play, Code, Eye, Heart } from 'lucide-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import {Navigation } from 'swiper/modules';
+import 'swiper/swiper-bundle.css';
 
-const Home = () => {
-    const [currentSlide, setCurrentSlide] = useState(0);
+const HomePage = () => {
+    const [stats, setStats] = useState({
+        activeUsers: 0,
+        dailyVisits: 0,
+        videosGenerated: 0,
+        songsGenerated: 0
+    });
+
+    const [isYearly, setIsYearly] = useState(false);
     const [selectedLanguage, setSelectedLanguage] = useState('global');
-    const [selectedTimeframe, setSelectedTimeframe] = useState('all-time');
-    const [isYearly, setIsYearly] = useState(false); // For yearly/monthly toggle
+    const [selectedTimeframe, setSelectedTimeframe] = useState('all-time');  // Keeping these
 
-    // Sample trending data
-    const trendingItems = [
-        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
-        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
-        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
-        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
-        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
-        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "Quantum Leap", artist: "FutureSounds", genre: "Experimental Electronic", views: "723K", likes: "11K", duration: "3:55", imageUrl: "/api/placeholder/400/320" },
-        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
-        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
-        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
-        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
-        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
-        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
-        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
-        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
-        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
-        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
-        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
-        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
-        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
-        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
-        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
-        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320" },
-        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320" },
-        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320" },
-        { title: "Dog", artist: "adios", genre: "Live music melodyjny rap", views: "442K", likes: "7.8K", duration: "3:22", imageUrl: "/api/placeholder/400/320" },
-        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320" },
-        { title: "MAYBE?!", artist: "AroundOnce", genre: "Electronic, sweet female", views: "876K", likes: "12K", duration: "3:45", imageUrl: "/api/placeholder/400/320" },
-        { title: "Nikola Tesla", artist: "crispity", genre: "melodic Techno, 1800's rock", views: "185K", likes: "5.8K", duration: "4:30", imageUrl: "/api/placeholder/400/320" }
+    
+
+    // Trending Data
+    const trendingMusic = [
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
+        { title: "World Hello!!", artist: "Cody", genre: "pop", views: "596K", likes: "9.9K", duration: "4:15", imageUrl: "/api/placeholder/400/320?text=AI+Music+3", type: "music", language: "hindi" },
+        { title: "Deep Night", artist: "Moisty", genre: "lo-fi Japanese city funk r...", views: "1.3M", likes: "22K", duration: "5:01", imageUrl: "/api/placeholder/400/320?text=AI+Music+4", type: "music", language: "global" },
+        { title: "OH AI (extended...", artist: "SpinningFee...", genre: "Driving 1980's Disco-po...", views: "413K", likes: "6.9K", duration: "3:30", imageUrl: "/api/placeholder/400/320?text=AI+Music+1", type: "music", language: "global" },
+        { title: "AI Took My Job", artist: "徐亚轩TMao...", genre: "symphony, rock, chorus ...", views: "432K", likes: "6.8K", duration: "2:43", imageUrl: "/api/placeholder/400/320?text=AI+Music+2", type: "music", language: "english" },
     ];
 
-    const Collections = [
-        "Beef Diplomat - Gone", 
-        "i have a feeling Covers", 
-        "Soundclash Covers", 
-        "Stone Covers", 
-        "Dialectic (Accept It) Covers", 
-        "Once Covers"
+    const trendingComedyShows = [
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "AI Comedy Hour", creator: "FunnyBot", category: "Stand-up", views: "892K", likes: "15.2K", duration: "15:00", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+1", type: "comedy", language: "global" },
+        { title: "Robot Jokes 2.0", creator: "AIComedy", category: "Sketch Comedy", views: "654K", likes: "12.1K", duration: "8:30", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+2", type: "comedy", language: "english" },
+        { title: "Neural Network News", creator: "AINewsroom", category: "News Parody", views: "445K", likes: "9.8K", duration: "12:45", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+3", type: "comedy", language: "hindi" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
+        { title: "Digital Laughs", creator: "ByteHumor", category: "Improv", views: "332K", likes: "7.5K", duration: "10:20", imageUrl: "/api/placeholder/400/320?text=Comedy+Show+4", type: "comedy", language: "global" },
     ];
-
-    const plans = [
-        {
-            name: 'Free',
-            price: isYearly ? 0 : 0,
-            features: ['50 credits renew daily (10 songs/5 videos)','Non-commercial terms','No credit top ups','Shared generation queue','running jobs at once'],
-            buttonColor: 'bg-blue-500 hover:bg-blue-600',
-            
-        },
-        {
-            name: 'Pro Plan',
-            price: isYearly ? 59 : 5,
-            features: ['2,500 credits renew monthly (500 songs/250 Videos)', 'Early access to new beta features', 'General commercial terms','Optional credit top ups','Priority generation queue',' 10 running jobs at once'],
-            buttonColor: 'bg-green-500 hover:bg-green-600',
-            discount: 'Save with yearly billing (20% off)'
-        },
-        {
-            name: 'Premium Plan',
-            price: isYearly ? 130 : 12,
-            features: ['10,000 credits renew monthly (2,000 songs/1000 videos)', 'Early access to new beta features', 'General commercial terms',' Optional credit top ups', 'Priority generation queue', '10 running jobs at once'],
-            buttonColor: 'bg-green-500 hover:bg-green-600',
-            discount: 'Save with yearly billing (20% off)'
-        },
-        {
-            name: 'Enterprise',
-            price: isYearly ? 250 : 25,
-            features: ['Custom credit amounts', 'General commercial terms', 'Custom top ups',' Custom generation queue', 'More concurrent generations'],
-            buttonColor: 'bg-green-500 hover:bg-green-600',
-        }
-    ];
-
-    const itemsPerSlide = 8;
-    const totalSlides = Math.ceil(trendingItems.length / itemsPerSlide);
-
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    };
-
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
-    };
 
     const getTrendingTitle = () => {
         const titles = {
@@ -111,241 +126,432 @@ const Home = () => {
         return titles[selectedLanguage] || 'Global Trending';
     };
 
-    const getFilteredItems = () => {
-        return trendingItems;
-    };
+    // Trending Card Component
+    const TrendingCard = ({ item }) => (
+        <motion.div
+            className="bg-gray-800/30 rounded-xl overflow-hidden backdrop-blur-sm hover:bg-gray-800/50 transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.02 }}
+        >
+            <div className="relative group">
+                <img 
+                    src={item.imageUrl} 
+                    alt={item.title}
+                    className="w-full h-48 object-cover"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="p-3 bg-purple-600 rounded-full"
+                    >
+                        <Play className="w-6 h-6 text-white" />
+                    </motion.button>
+                </div>
+            </div>
+            <div className="p-4">
+                <h3 className="text-lg font-semibold text-white truncate">{item.title}</h3>
+                <p className="text-gray-400 text-sm mb-2">{item.type === 'music' ? item.artist : item.creator}</p>
+                <p className="text-gray-500 text-sm mb-3">{item.type === 'music' ? item.genre : item.category}</p>
+                <div className="flex justify-between items-center text-sm">
+                    <div className="flex items-center space-x-2 text-gray-400">
+                        <Eye className="w-4 h-4" />
+                        <span>{item.views}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-gray-400">
+                        <Heart className="w-4 h-4" />
+                        <span>{item.likes}</span>
+                    </div>
+                    <span className="text-gray-400">{item.duration}</span>
+                </div>
+            </div>
+        </motion.div>
+    );
 
-    const visibleItems = getFilteredItems().slice(
-        currentSlide * itemsPerSlide,
-        (currentSlide * itemsPerSlide) + itemsPerSlide
+    // Filter trending items based on selected language
+    const filteredTrendingMusic = trendingMusic.filter(item => 
+        selectedLanguage === 'global' || item.language === selectedLanguage
+    );
+
+    const filteredTrendingComedyShows = trendingComedyShows.filter(item => 
+        selectedLanguage === 'global' || item.language === selectedLanguage
     );
 
     return (
-        <div className="home-page bg-gray-900 text-white min-h-screen">
+        <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900">
+            {/* Animated Background */}
+            <div className="fixed inset-0 opacity-20">
+                <motion.div 
+                    className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(76,29,149,0.3),rgba(0,0,0,0))]"
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        opacity: [0.3, 0.5, 0.3]
+                    }}
+                    transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        easings: ["easeInOut"]
+                    }}
+                />
+                <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
+            </div>
+
             {/* Hero Section */}
-            <section className="hero-section py-16 relative bg-gradient-to-br from-blue-600 to-purple-800 animate-gradient bg-gradient-size">
-                <div className="absolute inset-0 z-0 opacity-50"></div>
-                <div className="container mx-auto px-4 text-center relative z-10">
-                    <div className="hero-content max-w-3xl mx-auto">
-                        <h1 className="text-5xl font-bold mb-4">Welcome to Interdimensional Comedy & Song</h1>
-                        <p className="text-lg mb-8">Your daily dose of intergalactic music and comedy shows.</p>
-                        <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
-                            Log in
-                        </button>
-                        <img src="/path/to/your/image.jpg" alt="Hero visual representation" className="mt-8 mx-auto w-full max-w-md rounded-lg shadow-lg" />
-                    </div>
+            <section className="relative min-h-screen flex items-center justify-center px-4 py-20">
+                <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
+                    <motion.div 
+                        className="text-white space-y-8 z-10"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
+                            Create.
+                            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                                Perform.
+                            </span>
+                            Entertain.
+                        </h1>
+                        <p className="text-xl text-gray-300">
+                            Transform your creative vision into reality with AI-powered music and comedy production.
+                        </p>
+                        <div className="flex flex-wrap gap-4">
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-8 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
+                            >
+                                Get Started Free
+                            </motion.button>
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-8 py-3 rounded-full border border-purple-500 text-white hover:bg-purple-500/10"
+                            >
+                                Watch Demo
+                            </motion.button>
+                        </div>
+                    </motion.div>
+
+                    <motion.div 
+                        className="relative hidden lg:block"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full filter blur-3xl opacity-30" />
+                        <img 
+                            src="/api/placeholder/600/600" 
+                            alt="Creative Platform" 
+                            className="relative rounded-2xl shadow-2xl"
+                        />
+                    </motion.div>
                 </div>
             </section>
 
-            {/* Title for Song Section */}
-            <section className="song-section text-center">
-                <h2 className="text-4xl font-bold mb-4 pt-8">Top Songs</h2>
-            </section>
-
-            {/* Global Trending Section */}
-            <section className="global-trending-section py-12">
+            {/* Live Stats Section */}
+            <section className="relative py-12 px-4">
                 <div className="container mx-auto">
-                    <div className="px-8 flex items-center justify-between mb-8">
-                        <h2 className="text-4xl font-bold">{getTrendingTitle()}</h2>
-                        <div className="flex gap-4">
-                            <select 
-                                value={selectedLanguage} 
-                                onChange={(e) => setSelectedLanguage(e.target.value)}
-                                className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-                            >
-                                <option value="global">Global</option>
-                                <option value="english">English</option>
-                                <option value="hindi">Hindi</option>
-                                <option value="bangali">Bengali</option>
-                                <option value="arabic">Arabic</option>
-                                <option value="korean">Korean</option>
-                                <option value="spanish">Spanish</option>
-                                <option value="chinese">Chinese</option>
-                            </select>
-                            <select 
-                                value={selectedTimeframe} 
-                                onChange={(e) => setSelectedTimeframe(e.target.value)}
-                                className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-                            >
-                                <option value="all-time">All Time</option>
-                                <option value="monthly">Monthly</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="daily">Daily</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="relative px-8">
-                        <div className="flex items-center">
-                            <button 
-                                onClick={prevSlide}
-                                className="absolute left-0 z-10 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
-                            >
-                                <ChevronLeft size={24} />
-                            </button>
-                            <div className="flex gap-4 transition-transform duration-300 ease-in-out overflow-hidden">
-                                {visibleItems.map((item, index) => (
-                                    <div key={index} className="trending-item bg-gray-800 rounded-lg overflow-hidden w-64">
-                                        <div className="relative">
-                                            <img src={item.imageUrl} alt={item.title} className="w-full h-40 object-cover" />
-                                            <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                                                {item.duration}
-                                            </div>
-                                        </div>
-                                        <div className="p-3">
-                                            <h3 className="text-lg font-semibold mb-1 truncate">{item.title}</h3>
-                                            <p className="text-xs text-gray-400 mb-1">{item.artist}</p>
-                                            <p className="text-xs text-gray-400 mb-1">{item.genre}</p>
-                                            <p className="text-xs text-gray-400">{item.views} views • {item.likes} likes</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <button 
-                                onClick={nextSlide}
-                                className="absolute right-0 z-10 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
-                            >
-                                <ChevronRight size={24} />
-                            </button>
-                        </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <motion.div 
+                            className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm"
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <Users className="w-8 h-8 text-purple-400 mb-4" />
+                            <h3 className="text-2xl font-bold text-white">{stats.activeUsers.toLocaleString()}</h3>
+                            <p className="text-gray-400">Active Users</p>
+                        </motion.div>
+                        <motion.div 
+                            className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm"
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <Eye className="w-8 h-8 text-purple-400 mb-4" />
+                            <h3 className="text-2xl font-bold text-white">{stats.dailyVisits.toLocaleString()}</h3>
+                            <p className="text-gray-400">Daily Visits</p>
+                        </motion.div>
+                        <motion.div 
+                            className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm"
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <Video className="w-8 h-8 text-purple-400 mb-4" />
+                            <h3 className="text-2xl font-bold text-white">{stats.videosGenerated.toLocaleString()}</h3>
+                            <p className="text-gray-400">Videos Generated</p>
+                        </motion.div>
+                        <motion.div 
+                            className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm"
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <Music className="w-8 h-8 text-purple-400 mb-4" />
+                            <h3 className="text-2xl font-bold text-white">{stats.songsGenerated.toLocaleString()}</h3>
+                            <p className="text-gray-400">Songs Generated</p>
+                        </motion.div>
                     </div>
                 </div>
             </section>
 
-            {/* Collection Section */}
-            <section className="Collection-section py-12 bg-gray-800">
-                <div className="container mx-auto px-4">
-                    <h2 className="text-4xl font-bold text-center mb-8">Collection</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                        {Collections.map((cover, index) => (
-                            <div key={index} className="bg-gray-700 rounded-lg p-4 text-center hover:bg-gray-600 transition duration-300">
-                                <p className="text-sm">{cover}</p>
-                            </div>
+            {/* Services Section */}
+            <section className="relative py-20 px-4">
+                <div className="container mx-auto">
+                    <motion.div 
+                        className="text-center mb-16"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                    >
+                        <h2 className="text-4xl font-bold text-white mb-4">Our Services</h2>
+                        <p className="text-gray-300">Unleash your creativity with our powerful tools</p>
+                    </motion.div>
+
+                    <div className="grid md:grid-cols-1 lg:grid-cols-5 gap-8">
+                        {[
+                            {
+                                icon: <Music className="w-8 h-8" />,
+                                title: "AI Music Creation",
+                                description: "Create original music with our advanced AI technology"
+                            },
+                            {
+                                icon: <Zap className="w-8 h-8" />,
+                                title: "Song Extension",
+                                description: "Extend and remix your favorite tracks seamlessly"
+                            },
+                            {
+                                icon: <Video className="w-8 h-8" />,
+                                title: "Comedy Reels",
+                                description: "Generate hilarious 15-second comedy reels instantly"
+                            },
+                            {
+                                icon: <Clock className="w-8 h-8" />,
+                                title: "24/7 Live Shows",
+                                description: "Watch endless entertainment around the clock"
+                            },
+                            {
+                                icon: <Code className="w-8 h-8" />,
+                                title: "Event Coding",
+                                description: "Create codes for upcoming productions and events"
+                            }
+                        ].map((service, index) => (
+                            <motion.div
+                                key={index}
+                                className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 hover:bg-gray-800/70 transition-all duration-200 border border-gray-700"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                                whileHover={{ scale: 1.05 }}
+                            >
+                                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center text-purple-400 mb-4">
+                                    {service.icon}
+                                </div>
+                                <h3 className="text-xl font-semibold text-white mb-2">{service.title}</h3>
+                                <p className="text-gray-400">{service.description}</p>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Title for Comedy Section */}
-            <section className="trending-comedy-section  text-center ">
-                <h2 className="text-4xl font-bold mb-4 pt-8">Top Comedy Shows</h2>
-            </section>
-
-            {/* Global Trending Section */}
-            <section className="global-trending-section py-12">
+            {/* Trending Section */}
+            <section className="relative py-20 px-4">
                 <div className="container mx-auto">
-                    <div className="px-8 flex items-center justify-between mb-8">
-                        <h2 className="text-4xl font-bold">{getTrendingTitle()}</h2>
-                        <div className="flex gap-4">
-                            <select 
-                                value={selectedLanguage} 
-                                onChange={(e) => setSelectedLanguage(e.target.value)}
-                                className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-                            >
-                                <option value="global">Global</option>
-                                <option value="english">English</option>
-                                <option value="hindi">Hindi</option>
-                                <option value="bangali">Bengali</option>
-                                <option value="arabic">Arabic</option>
-                                <option value="korean">Korean</option>
-                                <option value="spanish">Spanish</option>
-                                <option value="chinese">Chinese</option>
-                            </select>
-                            <select 
-                                value={selectedTimeframe} 
-                                onChange={(e) => setSelectedTimeframe(e.target.value)}
-                                className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-                            >
-                                <option value="all-time">All Time</option>
-                                <option value="monthly">Monthly</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="daily">Daily</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="relative px-8">
-                        <div className="flex items-center">
-                            <button 
-                                onClick={prevSlide}
-                                className="absolute left-0 z-10 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
-                            >
-                                <ChevronLeft size={24} />
-                            </button>
-                            <div className="flex gap-4 transition-transform duration-300 ease-in-out overflow-hidden">
-                                {visibleItems.map((item, index) => (
-                                    <div key={index} className="trending-item bg-gray-800 rounded-lg overflow-hidden w-64">
-                                        <div className="relative">
-                                            <img src={item.imageUrl} alt={item.title} className="w-full h-40 object-cover" />
-                                            <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                                                {item.duration}
-                                            </div>
-                                        </div>
-                                        <div className="p-3">
-                                            <h3 className="text-lg font-semibold mb-1 truncate">{item.title}</h3>
-                                            <p className="text-xs text-gray-400 mb-1">{item.artist}</p>
-                                            <p className="text-xs text-gray-400 mb-1">{item.genre}</p>
-                                            <p className="text-xs text-gray-400">{item.views} views • {item.likes} likes</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <button 
-                                onClick={nextSlide}
-                                className="absolute right-0 z-10 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors"
-                            >
-                                <ChevronRight size={24} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                    <motion.div 
+                        className="mb-16"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-4xl font-bold text-white">{getTrendingTitle()}</h2>
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-purple-400" />
+                                <select 
+                                    value={selectedLanguage} 
+                                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                                    className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
+                                >
+                                    <option value="global">Global</option>
+                                    <option value="english">English</option>
+                                    <option value="hindi">Hindi</option>
+                                    <option value="bangali">Bengali</option>
+                                    <option value="arabic">Arabic</option>
+                                    <option value="korean">Korean</option>
+                                    <option value="spanish">Spanish</option>
+                                    <option value="chinese">Chinese</option>
+                                </select>
 
-            {/*Covers Section */}
-            <section className="Collection-section py-12 bg-gray-800">
-                <div className="container mx-auto px-4">
-                    <h2 className="text-4xl font-bold text-center mb-8">Comedy Collection</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                        {Collections.map((cover, index) => (
-                            <div key={index} className="bg-gray-700 rounded-lg p-4 text-center hover:bg-gray-600 transition duration-300">
-                                <p className="text-sm">{cover}</p>
+                                <select
+                                    value={selectedTimeframe}
+                                    onChange={(e) => setSelectedTimeframe(e.target.value)}
+                                    className="bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
+                                >
+                                    <option value="all-time">All-Time</option>
+                                    <option value="yearly">Yearly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+
+                        {/* Music Section Carousel */}
+                        <div className="mb-16">
+                            <div className="flex items-center mb-8">
+                                <Music className="w-6 h-6 text-purple-400 mr-3" />
+                                <h3 className="text-2xl font-bold text-white">Trending Music</h3>
+                            </div>
+                            <Swiper
+                                slidesPerView={1}
+                                spaceBetween={30}
+                                pagination={{
+                                    clickable: true,
+                                }}
+                                navigation
+                                breakpoints={{
+                                    640: {
+                                        slidesPerView: 2,
+                                    },
+                                    768: {
+                                        slidesPerView: 4,
+                                    },
+                                    1024: {
+                                        slidesPerView: 7,
+                                    },
+                                }}
+                            >
+                                {filteredTrendingMusic.map((item, index) => (
+                                    <SwiperSlide key={`music-${index}`}>
+                                        <TrendingCard item={item} />
+                                    </SwiperSlide>
+                                ))}
+                            </Swiper>
+                        </div>
+
+                        {/* Comedy Shows Section Carousel */}
+                        <div>
+                            <div className="flex items-center mb-8">
+                                <Video className="w-6 h-6 text-purple-400 mr-3" />
+                                <h3 className="text-2xl font-bold text-white">Trending Comedy Shows</h3>
+                            </div>
+                            <Swiper
+                                slidesPerView={1}
+                                spaceBetween={30}
+                                navigation={true}
+                                modules={[Navigation]}
+                                breakpoints={{
+                                    640: {
+                                        slidesPerView: 2,
+                                    },
+                                    768: {
+                                        slidesPerView: 4,
+                                    },
+                                    1024: {
+                                        slidesPerView: 7,
+                                    },
+                                }}
+                            >
+                                {filteredTrendingComedyShows.map((item, index) => (
+                                    <SwiperSlide key={`comedy-${index}`}>
+                                        <TrendingCard item={item} />
+                                    </SwiperSlide>
+                                ))}
+                            </Swiper>
+                        </div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* Pricing Section */}
-            <section className="pricing-section py-12">
-                <div className="container mx-auto text-center">
-                    <h2 className="text-4xl font-bold mb-8">Pricing Plans</h2>
-                    <div className="flex justify-center mb-4">
-                        <button 
-                            onClick={() => setIsYearly(false)} 
-                            className={`px-4 py-2 rounded-l-lg ${!isYearly ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-400'}`}
-                        >
-                            Monthly
-                        </button>
-                        <button 
-                            onClick={() => setIsYearly(true)} 
-                            className={`px-4 py-2 rounded-r-lg ${isYearly ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-400'}`}
-                        >
-                            Yearly
-                        </button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {plans.map((plan, index) => (
-                            <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg">
-                                <h3 className="text-2xl font-bold mb-4">{plan.name}</h3>
-                                <p className="text-4xl font-bold mb-4">${plan.price}</p>
-                                <button className={`w-full py-2 rounded-lg ${plan.buttonColor}`}>
-                                    Choose Plan
-                                </button>
-                                <p className="text-xs no-underline hover:underline white mt-2 font-bold">{plan.discount}</p>
-                                <ul className="mb-4">
-                                    {plan.features.map((feature, idx) => (
-                                        <li key={idx} className="text-gray-400 mb-2">{feature}</li>
+            <section className="relative py-20 px-4">
+                <div className="container mx-auto">
+                    <motion.div 
+                        className="text-center mb-16"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                    >
+                        <h2 className="text-4xl font-bold text-white mb-4">Choose Your Plan</h2>
+                        <p className="text-gray-300 mb-8">Select the perfect plan for your creative needs</p>
+                        <div className="flex items-center justify-center gap-4">
+                            <span className={`text-sm ${!isYearly ? 'text-white' : 'text-gray-400'}`}>Monthly</span>
+                            <button
+                                onClick={() => setIsYearly(!isYearly)}
+                                className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${isYearly ? 'bg-purple-600' : 'bg-gray-600'}`}
+                            >
+                                <motion.div
+                                    className="absolute w-5 h-5 bg-white rounded-full top-1"
+                                    animate={{ left: isYearly ? '1.75rem' : '0.25rem' }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                />
+                            </button>
+                            <span className={`text-sm ${isYearly ? 'text-white' : 'text-gray-400'}`}>Yearly</span>
+                        </div>
+                    </motion.div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[
+                            {
+                                name: 'Free',
+                                price: isYearly ? 0 : 0,
+                                features: ['50 credits renew daily (10 songs/5 videos)','Non-commercial terms','No credit top ups','Shared generation queue','running jobs at once'],
+                                buttonColor: 'bg-blue-500 hover:bg-blue-600',
+                            },
+                            {
+                                name: 'Pro Plan',
+                                price: isYearly ? 59 : 5,
+                                features: ['2,500 credits renew monthly (500 songs/250 Videos)', 'Early access to new beta features', 'General commercial terms','Optional credit top ups','Priority generation queue',' 10 running jobs at once'],
+                                buttonColor: 'bg-green-500 hover:bg-green-600',
+                                discount: 'Save with yearly billing (20% off)'
+                            },
+                            {
+                                name: 'Premium Plan',
+                                price: isYearly ? 130 : 12,
+                                features: ['10,000 credits renew monthly (2,000 songs/1000 videos)', 'Early access to new beta features', 'General commercial terms',' Optional credit top ups', 'Priority generation queue', '10 running jobs at once'],
+                                buttonColor: 'bg-green-500 hover:bg-green-600',
+                                discount: 'Save with yearly billing (20% off)'
+                            },
+                            {
+                                name: 'Enterprise',
+                                price: isYearly ? 250 : 25,
+                                features: ['Custom credit amounts', 'General commercial terms', 'Custom top ups',' Custom generation queue', 'More concurrent generations'],
+                                buttonColor: 'bg-green-500 hover:bg-green-600',
+                            }
+                        ].map((plan, index) => (
+                            <motion.div
+                                key={index}
+                                className="bg-gray-800/30 rounded-xl p-6 backdrop-blur-sm hover:bg-gray-800/50 transition-all duration-300"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                                whileHover={{ scale: 1.02 }}
+                            >
+                                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                                <div className="mb-6">
+                                    <span className="text-4xl font-bold text-white">
+                                        {typeof plan.price === 'number' ? `$${plan.price}` : plan.price}
+                                    </span>
+                                    {typeof plan.price === 'number' && (
+                                        <span className="text-gray-400">/{isYearly ? 'year' : 'month'}</span>
+                                    )}
+                                </div>
+                                {plan.discount && (
+                                    <p className="text-green-400 text-sm mb-4">{plan.discount}</p>
+                                )}
+                                <ul className="space-y-3 mb-6">
+                                    {plan.features.map((feature, featureIndex) => (
+                                        <li key={featureIndex} className="flex items-start space-x-2 text-gray-300">
+                                            <Star className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                                            <span>{feature}</span>
+                                        </li>
                                     ))}
                                 </ul>
-                            </div>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className={`w-full py-3 rounded-lg ${plan.buttonColor} text-white font-semibold`}
+                                >
+                                    {plan.name === 'Enterprise' ? 'Contact Us' : 'Get Started'}
+                                </motion.button>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
@@ -354,4 +560,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default HomePage;

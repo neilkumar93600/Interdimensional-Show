@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PaperclipIcon, Loader2 } from 'lucide-react';
+import { PaperclipIcon, Loader2, X } from 'lucide-react';
 import { Alert, AlertDescription } from '../components/ui/alert'; // Corrected import path for Alert
 
 const analyzeImage = async (base64Image) => {
@@ -129,6 +129,7 @@ const ComedyShow = () => {
   const [additionalImage, setAdditionalImage] = useState(null);
   const [videoUrl, setVideoUrl] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
   const [error, setError] = useState(null);
   const [generatedScript, setGeneratedScript] = useState('');
@@ -157,7 +158,6 @@ const ComedyShow = () => {
         const base64Image = reader.result;
         setAdditionalImage(base64Image);
         setStatusMessage('Image uploaded successfully');
-
         setLoading(false);
       };
 
@@ -173,13 +173,29 @@ const ComedyShow = () => {
     }
   };
 
+  const handleRemoveImage = () => {
+    setAdditionalImage(null);
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setProgress(0);
     setError(null);
     setStatusMessage('Processing your request...');
     setGeneratedScript('');
     setVideoUrl(null);
+
+    // Simulate progress
+    const interval = setInterval(() => {
+      setProgress((oldProgress) => {
+        if (oldProgress >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return Math.min(oldProgress + 10, 100);
+      });
+    }, 500);
 
     try {
       setStatusMessage('Generating comedy script...');
@@ -198,15 +214,17 @@ const ComedyShow = () => {
           Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'gpt-4', // Upgraded GPT version
+          model: 'gpt-4',
           messages: [{ role: 'user', content: scriptPrompt }],
           max_tokens: 500,
         }),
       });
-
+      
       if (!scriptResponse.ok) {
-        throw new Error('Failed to generate script');
-      }
+        const errorData = await scriptResponse.json();
+        console.error('Error details:', errorData); // Log error details
+        throw new Error(errorData.message || 'Failed to generate script');
+      }      
 
       const scriptData = await scriptResponse.json();
       const script = scriptData.choices[0].message.content;
@@ -230,11 +248,11 @@ const ComedyShow = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-between bg-gray-800 text-white p-6">
+    <div className="min-h-screen flex flex-col lg:flex-row justify-between bg-gray-800 text-white p-6">
       {/* Form Section */}
       <form
         onSubmit={handleFormSubmit}
-        className="w-1/2 bg-gray-900 p-6 rounded-md shadow-md space-y-6"
+        className="w-full lg:w-1/2 bg-gray-900 p-6 rounded-md shadow-md space-y-6"
       >
         {/* Theme Selection */}
         <div>
@@ -324,8 +342,15 @@ const ComedyShow = () => {
             </label>
           </div>
           {additionalImage && (
-            <div className="mt-2 text-sm text-green-400">
-              Additional image uploaded successfully
+            <div className="mt-2 flex items-center">
+              <img src={additionalImage} alt="Uploaded" className="max-w-xs rounded-md" />
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="ml-2 p-1 bg-red-500 rounded-full"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
           )}
         </div>
@@ -347,6 +372,16 @@ const ComedyShow = () => {
             'Generate Comedy Script'
           )}
         </button>
+
+        {/* Progress Bar */}
+        {loading && (
+          <div className="w-full bg-gray-600 rounded-full mt-4">
+            <div
+              className="bg-blue-500 h-2 rounded-full"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        )}
 
         {/* Generated Script Display */}
         {generatedScript && (
@@ -372,7 +407,7 @@ const ComedyShow = () => {
       </form>
 
       {/* Output Section */}
-      <div className="w-1/2 p-6 space-y-6">
+      <div className="w-full lg:w-1/2 p-6 space-y-6">
         {loading ? (
           <div className="flex items-center space-x-2">
             <Loader2 className="animate-spin w-5 h-5" />

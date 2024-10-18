@@ -9,23 +9,25 @@ import TwentyFourHourShow from './pages/TwentyFourHourShow';
 import ForgetPassword from './pages/forgot-password';
 import Signup from './pages/signup';
 import Login from './pages/login';
-// import Music24 from './pages/Music24';
+import Musichomepage from './pages/music-homepage';
 
 function App() {
   return (
     <Router>
-      <div>
+      <div className="flex flex-col min-h-screen">
         <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/music" element={<Music />} />
-          <Route path="/comedy" element={<ComedyShow />} />
-          <Route path="/24h-show" element={<TwentyFourHourShow />} />
-          <Route path="/forget-password" element={<ForgetPassword />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          {/* <Route path="/Music24" element={<Music24 />} /> */}
-        </Routes>
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/music" element={<Music />} />
+            <Route path="/comedy" element={<ComedyShow />} />
+            <Route path="/24h-show" element={<TwentyFourHourShow />} />
+            <Route path="/forget-password" element={<ForgetPassword />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/Musichomepage" element={<Musichomepage />} />
+          </Routes>
+        </main>
         <Footer />
       </div>
     </Router>
