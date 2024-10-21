@@ -37,7 +37,7 @@ function Header() {
     const navLinks = [
         { path: '/', label: 'Home', icon: <FaMusic className="mr-2" /> },
         { path: '/Musichomepage', label: 'Music Studio', icon: <FaMicrophone className="mr-2" /> },
-        { path: '/comedy', label: 'Comedy Lab', icon: <FaVideo className="mr-2" /> },
+        { path: '/Comedylab', label: 'Comedy Lab', icon: <FaVideo className="mr-2" /> },
         { path: '/24h-show', label: 'Live Shows', icon: <FaClock className="mr-2" /> },
     ];
 

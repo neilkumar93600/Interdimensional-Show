@@ -10,6 +10,11 @@ import ForgetPassword from './pages/forgot-password';
 import Signup from './pages/signup';
 import Login from './pages/login';
 import Musichomepage from './pages/music-homepage';
+import Comedystudio from './pages/comedy-studio';
+import FifteenReel from './pages/15-Reel';  // Import the 15-Reel component
+import LoFiPage from './pages/LoFiPage';
+import SongCreation from './pages/song-creation';
+
 
 function App() {
   return (
@@ -26,6 +31,10 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/Musichomepage" element={<Musichomepage />} />
+            <Route path="/Comedylab" element={<Comedystudio />} />
+            <Route path="/15-reel" element={<FifteenReel />} />
+            <Route path="/lofi-converter" element={<LoFiPage />} />
+            <Route path="/song-creation" element={<SongCreation />} />
           </Routes>
         </main>
         <Footer />
