@@ -6,6 +6,15 @@ module.exports = {
     path: __dirname + '/dist',
     filename: 'bundle.js',
   },
+  resolve: {
+    fallback: {
+      fs: false,
+      path: require.resolve('path-browserify'),
+      util: require.resolve('util/'),
+      stream: require.resolve('stream-browserify'),
+      child_process: false
+    }
+  },
   module: {
     rules: [
       {
