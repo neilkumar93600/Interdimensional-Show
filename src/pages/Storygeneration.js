@@ -39,6 +39,7 @@ import {
   Language,
   AccessTime
 } from '@mui/icons-material';
+import OpenAI from 'openai';
 
 // Styled Components with Enhanced Aesthetics
 const StyledBox = styled(Box)(({ theme }) => ({
@@ -248,12 +249,13 @@ const handleGenerateStory = async () => {
       Create a ${length} story that captures the essence of the genre while maintaining appropriate content and complexity.`;
 
     const userPrompt = prompt || `Create a compelling ${genre} story`;
-
+    const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
+    const openAI = new OpenAI({ apiKey });
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
+        'Authorization': `Bearer ${process.env.apiKey}`
       },
       body: JSON.stringify({
         model: 'gpt-4o',
