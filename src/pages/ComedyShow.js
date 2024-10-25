@@ -295,13 +295,13 @@ const generateComedyScript = async (prompt, comedyType, audience, duration, imag
         'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4',
         messages: [
           {
             role: 'system',
             content: `You are a professional comedy writer specializing in ${comedyType} comedy. 
-                      Create content that is appropriate for a ${audience} audience and runs for ${duration}.
-                      Include stage directions and timing markers.`
+                      Create content that is appropriate for a ${audience} audience and has a duration of ${duration}.
+                      Provide only the comedian's lines with a continuous script format.`
           },
           {
             role: 'user',
@@ -309,11 +309,10 @@ const generateComedyScript = async (prompt, comedyType, audience, duration, imag
                       ${prompt}
                       ${imageAnalysis ? `\nIncorporate these visual elements: ${imageAnalysis}` : ''}
                       
-                      Format the output with:
-                      - Clear section headers with timestamps
-                      - Stage directions in [brackets]
-                      - Audience interaction cues
-                      - Proper pacing for ${duration} duration
+                      Format the output as:
+                      - Only the comedian's lines
+                      - Avoid any stage directions, timestamps, or interaction cues
+                      - Suitable pacing for a duration of ${duration}
                       - Appropriate humor level for ${audience} audience`
           }
         ],
