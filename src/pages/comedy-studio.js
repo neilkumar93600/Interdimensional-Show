@@ -58,18 +58,21 @@ const ComedyStudioPage = () => {
     },
     {
       icon: Image,
-      title: "Roasting Show",
-      description: "Turn any image into a comedic roasting masterpiece"
+      title: "Story Generation",
+      description: "Turn any image into a comedic roasting masterpiece",
+      onClick: () => navigate('/Storytime')
     },
     {
       icon: Mic,
-      title: "Stand-up Generator",
-      description: "Generate stand-up comedy material with AI assistance"
+      title: "Comedy Script Generator",
+      description: "Generate stand-up comedy material with AI assistance",
+      onClick: () => navigate('/comedy')
     },
     {
       icon: Share,
-      title: "Comedy Collaboration",
-      description: "Connect with other comedians and create together"
+      title: "Caption Generation",
+      description: "Connect with other comedians and create together",
+      onClick: () => navigate('/caption-generator')
     }
   ];
 
@@ -95,7 +98,7 @@ const ComedyStudioPage = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-purple-900 text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900 text-white overflow-hidden">
       {/* Hero Section */}
       <motion.section 
         initial={{ opacity: 0 }}

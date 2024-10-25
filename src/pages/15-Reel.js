@@ -8,26 +8,65 @@ import {
     Grid,
     Alert,
     Snackbar,
+    Slider,
     LinearProgress,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    CircularProgress,
+    Stack,
     Card,
-    CardContent,
+    CardContent
 } from '@mui/material';
 import {
     Delete,
     Download,
     Share,
-    CloudUpload
+    CloudUpload,
+    Facebook,
+    Twitter,
+    LinkedIn,
+    WhatsApp,
+    Refresh,
+    Settings,
+    Help
 } from '@mui/icons-material';
-import { motion } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import axios from 'axios';
 
-// Initialize FFmpeg
+// FFmpeg Configuration
 const ffmpeg = new FFmpeg();
+const BASE_URL = 'https://unpkg.com/@ffmpeg/core@0.12.2/dist/umd';
 
-// Styled components
+// Voice Configuration
+const VOICE_OPTIONS = [
+    { value: 'alloy', label: 'Alloy', description: 'Versatile and balanced voice' },
+    { value: 'echo', label: 'Echo', description: 'Warm and precise voice' },
+    { value: 'fable', label: 'Fable', description: 'Expressive and dynamic voice' },
+    { value: 'onyx', label: 'Onyx', description: 'Deep and resonant voice' },
+    { value: 'nova', label: 'Nova', description: 'Youthful and bright voice' }
+];
+
+// Constants
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const SUPPORTED_FORMATS = ['image/jpeg', 'image/png', 'image/webp'];
+const DEFAULT_ROAST_DURATION = 15; // seconds
+
+// Styled Components
+const GradientBackground = styled(Box)({
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #4c1d95 0%, #1a1a1a 50%, #2d1b4e 100%)',
+    padding: '64px 32px 32px 32px'
+});
+
 const UploadBox = styled(Paper)(({ theme }) => ({
     height: '200px',
     display: 'flex',
@@ -37,7 +76,9 @@ const UploadBox = styled(Paper)(({ theme }) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
     border: '2px dashed rgba(255, 255, 255, 0.2)',
     cursor: 'pointer',
-    transition: 'all 0.3s ease-in-out',
+    transition: theme.transitions.create(['background-color', 'border-color'], {
+        duration: theme.transitions.duration.standard,
+    }),
     '&:hover': {
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
         borderColor: theme.palette.primary.main,
@@ -48,276 +89,267 @@ const ImagePreview = styled('img')({
     width: '100%',
     height: '200px',
     objectFit: 'contain',
-    borderRadius: '8px',
+    borderRadius: '8px'
 });
 
 const VideoPreview = styled('video')({
     width: '100%',
     height: '300px',
     objectFit: 'contain',
-    borderRadius: '8px',
-});
-
-const GradientBackground = styled(Box)({
-    minHeight: '100vh',
-    background: 'linear-gradient(to bottom right, #4c1d95, #1C1C1C, #1A002E)',
-    padding: '64px 32px 32px 32px',
+    borderRadius: '8px'
 });
 
 const RoastVideoCreator = () => {
+    // State Management
     const [imageFile, setImageFile] = useState(null);
-    const [additionalImage, setAdditionalImage] = useState(null);
-    const [roastScript, setRoastScript] = useState('');
-    const [audioBlob, setAudioBlob] = useState(null);
     const [videoUrl, setVideoUrl] = useState('');
-    const [alert, setAlert] = useState({ open: false, message: '', severity: 'info' });
+    const [selectedVoice, setSelectedVoice] = useState('alloy');
     const [isLoading, setIsLoading] = useState(false);
-    const [processProgress, setProcessProgress] = useState(0);
+    const [progress, setProgress] = useState(0);
     const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
+    const [roastScript, setRoastScript] = useState('');
+    const [audioBlob, setAudioBlob] = useState(null);
+    const [shareDialogOpen, setShareDialogOpen] = useState(false);
+    const [alert, setAlert] = useState({ open: false, message: '', severity: 'info' });
+    const [settings, setSettings] = useState({
+        duration: DEFAULT_ROAST_DURATION,
+        subtitleColor: '#ffffff',
+        subtitleSize: 24,
+        roastStyle: 'funny'
+    });
+    const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
 
-    // Load FFmpeg on component mount
+    // FFmpeg Initialization
     useEffect(() => {
-        const loadFfmpeg = async () => {
+        const loadFFmpeg = async () => {
             try {
-                await ffmpeg.load();
+                await ffmpeg.load({
+                    coreURL: await toBlobURL(`${BASE_URL}/ffmpeg-core.js`, 'text/javascript'),
+                    wasmURL: await toBlobURL(`${BASE_URL}/ffmpeg-core.wasm`, 'application/wasm'),
+                });
                 setFfmpegLoaded(true);
-                showAlert('FFmpeg loaded successfully', 'success');
+                showAlert('Video processor initialized successfully', 'success');
             } catch (error) {
-                console.error('Error loading FFmpeg:', error);
-                showAlert('Failed to load video processing capabilities', 'error');
+                console.error('FFmpeg initialization error:', error);
+                showAlert('Failed to initialize video processor', 'error');
             }
         };
-        loadFfmpeg();
+        loadFFmpeg();
     }, []);
 
-    const showAlert = (message, severity = 'info') => {
-        setAlert({ open: true, message, severity });
-    };
+    // File Upload Handler
+    const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
+        if (rejectedFiles.length > 0) {
+            const error = rejectedFiles[0].errors[0];
+            if (error.code === 'file-too-large') {
+                showAlert(`File is too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB`, 'error');
+            } else if (error.code === 'file-invalid-type') {
+                showAlert('Invalid file type. Please upload an image file', 'error');
+            }
+            return;
+        }
 
-    const handleCloseAlert = () => {
-        setAlert({ ...alert, open: false });
-    };
-
-    // Dropzone setup for main image
-    const onDrop = useCallback((acceptedFiles) => {
         const file = acceptedFiles[0];
-        if (file && file.type.startsWith('image/')) {
+        if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => setImageFile({
-                url: e.target.result,
-                file: file
-            });
+            reader.onload = (e) => {
+                setImageFile({
+                    url: e.target.result,
+                    file: file,
+                    name: file.name
+                });
+                showAlert('Image uploaded successfully', 'success');
+            };
             reader.readAsDataURL(file);
-            showAlert('Image uploaded successfully', 'success');
-        } else {
-            showAlert('Please upload a valid image file', 'error');
         }
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept: {
-            'image/*': []
+            'image/*': SUPPORTED_FORMATS
         },
-        maxSize: 10 * 1024 * 1024 // 10MB max file size
+        maxSize: MAX_FILE_SIZE,
+        multiple: false
     });
 
-    // Dropzone setup for additional image
-    const onDropAdditional = useCallback((acceptedFiles) => {
-        const file = acceptedFiles[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => setAdditionalImage({
-                url: e.target.result,
-                file: file
-            });
-            reader.readAsDataURL(file);
-            showAlert('Additional image uploaded successfully', 'success');
-        } else {
-            showAlert('Please upload a valid image file', 'error');
-        }
-    }, []);
-
-    const { getRootProps: getRootPropsAdditional, getInputProps: getInputPropsAdditional } = useDropzone({
-        onDrop: onDropAdditional,
-        accept: {
-            'image/*': []
-        },
-        maxSize: 10 * 1024 * 1024 // 10MB max file size
-    });
-
-    const analyzeImage = async (imageUrl) => {
-        try {
-            const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-                model: 'gpt-4-vision-preview',
-                messages: [
-                    {
-                        role: 'user',
-                        content: [
-                            { type: 'text', text: 'Analyze this image and describe the key elements that could be used in a comedy routine.' },
-                            {
-                                type: 'image_url',
-                                image_url: {
-                                    url: imageUrl,
-                                    detail: 'low'
-                                }
-                            }
-                        ]
-                    }
-                ],
-                max_tokens: 300
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            return response.data.choices[0].message.content;
-        } catch (error) {
-            console.error('Error analyzing image:', error);
-            throw error;
-        }
+    // Alert Handler
+    const showAlert = (message, severity = 'info') => {
+        setAlert({ open: true, message, severity });
     };
 
+    const handleCloseAlert = (event, reason) => {
+        if (reason === 'clickaway') return;
+        setAlert({ ...alert, open: false });
+    };
+
+    // Video Generation Process
     const analyzeImageAndGenerateRoast = async () => {
-        if (!imageFile) return;
+        if (!imageFile || !ffmpegLoaded) return;
 
         setIsLoading(true);
-        setProcessProgress(0);
+        setProgress(0);
 
         try {
-            // Analyze the main image
-            setStatusMessage('Analyzing main image...');
-            const mainImageAnalysis = await analyzeImage(imageFile.url);
-
-            // Generate script
-            setStatusMessage('Generating comedy script...');
-            let scriptPrompt = `Generate a 15 sec roast comedy script for a everyone audience, containing only spoken dialogue without any stage directions, character names, or audience reactions. Base the script on this image analysis: ${mainImageAnalysis}`;
-
-            const scriptResponse = await axios.post('https://api.openai.com/v1/chat/completions', {
-                model: 'gpt-4',
-                messages: [{ role: 'user', content: scriptPrompt }],
-                max_tokens: 500,
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const generatedScript = scriptResponse.data.choices[0].message.content;
-            setRoastScript(generatedScript);
-            showAlert('Roast script generated successfully', 'success');
-
-            // Generate audio from the script
-            await generateAudio(generatedScript);
-
-        } catch (error) {
-            console.error('Error analyzing image and generating roast:', error);
-            showAlert('Failed to generate roast script', 'error');
-        } finally {
-            setIsLoading(false);
-            setStatusMessage('');
-        }
-    };
-
-    const generateAudio = async (script) => {
-        try {
-            setStatusMessage('Generating audio...');
-            const response = await axios.post('https://api.openai.com/v1/audio/speech', {
-                model: "tts-1",
-                voice: "alloy",
-                input: script
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-                    'Content-Type': 'application/json'
+            // Step 1: Analyze image and generate roast
+            setStatusMessage('Analyzing image...');
+            const imageAnalysisResponse = await axios.post(
+                'https://api.openai.com/v1/chat/completions',
+                {
+                    model: 'gpt-4o',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: `You are a ${settings.roastStyle} roast comedian. Create a ${settings.roastStyle} roast based on the image provided.`
+                        },
+                        {
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: `Create a ${settings.duration}-second roast that matches this style: ${settings.roastStyle}`
+                                },
+                                {
+                                    type: 'image_url',
+                                    image_url: { url: imageFile.url }
+                                }
+                            ]
+                        }
+                    ],
+                    max_tokens: 500
                 },
-                responseType: 'arraybuffer'
-            });
+                {
+                    headers: {
+                        'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
 
-            const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+            const generatedScript = imageAnalysisResponse.data.choices[0].message.content;
+            setRoastScript(generatedScript);
+            setProgress(30);
+
+            // Step 2: Generate Audio
+            setStatusMessage('Generating audio...');
+            const audioResponse = await axios.post(
+                'https://api.openai.com/v1/audio/speech',
+                {
+                    model: 'tts-1',
+                    voice: selectedVoice,
+                    input: generatedScript
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    responseType: 'blob'
+                }
+            );
+
+            const audioBlob = new Blob([audioResponse.data], { type: 'audio/mpeg' });
             setAudioBlob(audioBlob);
-            showAlert('Audio generated successfully', 'success');
+            setProgress(60);
 
-            // Proceed to create video
-            await createVideo();
+            // Step 3: Generate Video
+            await generateVideo(audioBlob, generatedScript);
+            setProgress(100);
+            showAlert('Video generated successfully!', 'success');
 
         } catch (error) {
-            console.error('Error generating audio:', error);
-            showAlert('Failed to generate audio', 'error');
-        }
-    };
-
-    const createVideo = async () => {
-        if (!imageFile || !audioBlob || !ffmpegLoaded) return;
-
-        setIsLoading(true);
-        setProcessProgress(0);
-        setStatusMessage('Creating video...');
-
-        try {
-            // Write files to FFmpeg
-            await ffmpeg.writeFile('image.png', await fetchFile(imageFile.url));
-            await ffmpeg.writeFile('audio.mp3', await fetchFile(audioBlob));
-
-            // Generate subtitles
-            const subtitles = generateSubtitles(roastScript);
-            await ffmpeg.writeFile('subtitles.srt', subtitles);
-
-            // Create video
-            await ffmpeg.exec([
-                '-loop', '1',
-                '-i', 'image.png',
-                '-i', 'audio.mp3',
-                '-vf', `subtitles=subtitles.srt:force_style='FontName=Arial,FontSize=24,PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3'`,
-                '-c:v', 'libx264',
-                '-t', '15',
-                '-pix_fmt', 'yuv420p',
-                '-vf', 'scale=1280:720',
-                'output.mp4'
-            ]);
-
-            // Read the result
-            const data = await ffmpeg.readFile('output.mp4');
-            const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
-            const videoUrl = URL.createObjectURL(videoBlob);
-            setVideoUrl(videoUrl);
-
-            showAlert('Roast video created successfully', 'success');
-        } catch (error) {
-            console.error('Error creating video:', error);
-            showAlert('Failed to create video', 'error');
+            console.error('Error in video generation:', error);
+            showAlert('Error: ' + error.message, 'error');
         } finally {
             setIsLoading(false);
-            setProcessProgress(100);
             setStatusMessage('');
         }
     };
 
-    const generateSubtitles = (script) => {
-        // Simple subtitle generation logic
-        const lines = script.split('. ');
+    // Video Generation Helper Functions
+    const generateSRT = (text) => {
+        const words = text.split(' ');
         let srt = '';
-        lines.forEach((line, index) => {
-            const startTime = index * 3; // 3 seconds per line
-            const endTime = (index + 1) * 3;
-            srt += `${index + 1}\n`;
-            srt += `00:00:${startTime.toString().padStart(2, '0')},000 --> 00:00:${endTime.toString().padStart(2, '0')},000\n`;
-            srt += `${line}\n\n`;
-        });
+        let index = 1;
+        let currentTime = 0;
+        const wordsPerLine = Math.ceil(words.length / (settings.duration / 3));
+
+        for (let i = 0; i < words.length; i += wordsPerLine) {
+            const line = words.slice(i, i + wordsPerLine).join(' ');
+            const duration = settings.duration / (Math.ceil(words.length / wordsPerLine));
+
+            const startTime = formatSRTTime(currentTime);
+            currentTime += duration;
+            const endTime = formatSRTTime(currentTime);
+
+            srt += `${index}\n${startTime} --> ${endTime}\n${line}\n\n`;
+            index++;
+        }
+
         return srt;
     };
 
+    const formatSRTTime = (seconds) => {
+        const pad = (num) => num.toString().padStart(2, '0');
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        const ms = Math.floor((seconds % 1) * 1000);
+        return `${pad(hours)}:${pad(minutes)}:${pad(secs)},${ms.toString().padStart(3, '0')}`;
+    };
+
+    const generateVideo = async (audioBlob, script) => {
+    try {
+        setStatusMessage('Preparing video components...');
+
+        // Convert files to ArrayBuffer
+        const imageArrayBuffer = await imageFile.file.arrayBuffer();
+        const audioArrayBuffer = await audioBlob.arrayBuffer();
+
+        // Write files to FFmpeg virtual filesystem
+        await ffmpeg.writeFile('input.jpg', new Uint8Array(imageArrayBuffer));
+        await ffmpeg.writeFile('audio.mp3', new Uint8Array(audioArrayBuffer));
+
+        // Generate and write subtitles
+        const subtitles = generateSRT(script);
+        await ffmpeg.writeFile('subtitles.srt', subtitles);
+
+        setStatusMessage('Generating video...');
+
+        // FFmpeg command for video generation in portrait mode (1080x1920) with padding and scaling
+        await ffmpeg.exec([
+            '-loop', '1',
+            '-i', 'input.jpg',
+            '-i', 'audio.mp3',
+            '-vf', `subtitles=subtitles.srt:force_style='FontSize=${settings.subtitleSize},FontColor=${settings.subtitleColor},Alignment=10,BorderStyle=3,Outline=1,Shadow=0',
+                    scale=1080:-1, pad=1080:1920:(ow-iw)/2:(oh-ih)/2`,
+            '-c:v', 'libx264',
+            '-tune', 'stillimage',
+            '-c:a', 'aac',
+            '-b:a', '192k',
+            '-pix_fmt', 'yuv420p',
+            '-shortest',
+            '-t', `${settings.duration}`,
+            'output.mp4'
+        ]);
+
+        const data = await ffmpeg.readFile('output.mp4');
+        const videoBlob = new Blob([data], { type: 'video/mp4' });
+        setVideoUrl(URL.createObjectURL(videoBlob));
+    } catch (error) {
+        throw new Error('Failed to generate video: ' + error.message);
+    }
+};
+
+
+    // UI Event Handlers
     const handleDeleteImage = () => {
         setImageFile(null);
-        setAdditionalImage(null);
         setRoastScript('');
         setAudioBlob(null);
         setVideoUrl('');
-        showAlert('Images and generated content deleted', 'info');
+        showAlert('Content cleared', 'info');
     };
 
     const handleDownloadVideo = () => {
@@ -332,38 +364,26 @@ const RoastVideoCreator = () => {
     };
 
     const handleShareVideo = () => {
-        if (navigator.share && videoUrl) {
-            navigator.share({
-                title: '15-Second Roast Video',
-                text: 'Check out this hilarious roast video!',
-                url: videoUrl
-            }).then(() => {
-                showAlert('Video shared successfully', 'success');
-            }).catch((error) => {
-                console.error('Error sharing video:', error);
-                showAlert('Failed to share video', 'error');
-            });
-        } else {
-            showAlert('Sharing is not supported on this device', 'warning');
-        }
+        setShareDialogOpen(true);
+    };
+
+    const handleSettingsChange = (setting, value) => {
+        setSettings(prev => ({
+            ...prev,
+            [setting]: value
+        }));
     };
 
     return (
         <GradientBackground>
-            <Box maxWidth="1200px" margin="auto" mt={6}>
+            <Box maxWidth="1200px" margin="auto">
                 {/* Header */}
-                <motion.div
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <Typography variant="h2" component="h1" align="center" gutterBottom sx={{ color: 'white' }}>
-                        15-Second Roast Video Creator
-                    </Typography>
-                    <Typography variant="h6" align="center" sx={{ color: 'rgba(255,255,255,0.7)', mb: 4 }}>
-                        Upload an image and let AI create a hilarious roast video!
-                    </Typography>
-                </motion.div>
+                <Typography variant="h2" component="h1" align="center" gutterBottom sx={{ color: 'white' }}>
+                    15-Second Roast Video Creator
+                </Typography>
+                <Typography variant="h6" align="center" sx={{ color: 'rgba(255,255,255,0.7)', mb: 4 }}>
+                    Upload an image and let AI create a hilarious roast video!
+                </Typography>
 
                 {/* Main Content */}
                 <Paper elevation={3} sx={{ p: 4, bgcolor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
@@ -373,35 +393,58 @@ const RoastVideoCreator = () => {
                             <Box position="relative">
                                 {isLoading && (
                                     <Box position="absolute" width="100%" zIndex={1}>
-                                        <LinearProgress variant="determinate" value={processProgress} />
+                                        <LinearProgress variant="determinate" value={progress} />
                                     </Box>
                                 )}
                                 {imageFile ? (
-                                    <ImagePreview src={imageFile.url} alt="Uploaded content" />
+                                    <Box position="relative">
+                                        <ImagePreview src={imageFile.url} alt="Uploaded content" />
+                                        <IconButton
+                                            onClick={handleDeleteImage}
+                                            sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(0,0,0,0.5)' }}
+                                        >
+                                            <Delete />
+                                        </IconButton>
+                                    </Box>
                                 ) : (
                                     <UploadBox {...getRootProps()}>
                                         <input {...getInputProps()} />
                                         <CloudUpload sx={{ fontSize: 64, color: 'rgba(255,255,255,0.5)', mb: 2 }} />
                                         <Typography variant="h6" color="textSecondary">
-                                            {isDragActive
-                                                ? "Drop your image here"
-                                                : "Drag & drop or click to upload main image"}
+                                            {isDragActive ? "Drop your image here" : "Drag & drop or click to upload"}
                                         </Typography>
                                     </UploadBox>
                                 )}
                             </Box>
-                            
-                            <Box mt={2} display="flex" justifyContent="center">
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    startIcon={<Delete />}
-                                    onClick={handleDeleteImage}
-                                    disabled={!imageFile || isLoading}
+
+                            {/* Voice Selection */}
+                            <FormControl fullWidth sx={{ mt: 2 }}>
+                                <InputLabel>Voice</InputLabel>
+                                <Select
+                                    value={selectedVoice}
+                                    onChange={(e) => setSelectedVoice(e.target.value)}
+                                    label="Voice"
                                 >
-                                    Remove Images
-                                </Button>
-                            </Box>
+                                    {VOICE_OPTIONS.map((voice) => (
+                                        <MenuItem key={voice.value} value={voice.value}>
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <Typography>{voice.label}</Typography>
+                                                <Help fontSize="small" />
+                                            </Stack>
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+
+                            {/* Settings Button */}
+                            <Button
+                                startIcon={<Settings />}
+                                onClick={() => setSettingsDialogOpen(true)}
+                                fullWidth
+                                sx={{ mt: 2 }}
+                            >
+                                Advanced Settings
+                            </Button>
                         </Grid>
 
                         {/* Right Side - Video Preview and Controls */}
@@ -415,19 +458,22 @@ const RoastVideoCreator = () => {
                                     </Typography>
                                 </Box>
                             )}
-                            <Box mt={2} display="flex" flexDirection="column" alignItems="center">
+
+                            {/* Action Buttons */}
+                            <Stack spacing={2} mt={2}>
                                 <Button
                                     variant="contained"
                                     color="primary"
                                     onClick={analyzeImageAndGenerateRoast}
                                     disabled={!imageFile || isLoading}
+                                    startIcon={isLoading ? <CircularProgress size={20} /> : <Refresh />}
                                     fullWidth
-                                    sx={{ mb: 2 }}
                                 >
-                                    Generate Roast Video
+                                    {isLoading ? 'Generating...' : 'Generate Roast Video'}
                                 </Button>
+
                                 {videoUrl && (
-                                    <Box display="flex" justifyContent="center" gap={2} width="100%">
+                                    <Stack direction="row" spacing={2}>
                                         <Button
                                             variant="contained"
                                             color="secondary"
@@ -446,69 +492,97 @@ const RoastVideoCreator = () => {
                                         >
                                             Share
                                         </Button>
-                                    </Box>
+                                    </Stack>
                                 )}
-                            </Box>
+                            </Stack>
+
+                            {/* Status and Script Display */}
                             {statusMessage && (
                                 <Alert severity="info" sx={{ mt: 2 }}>
                                     {statusMessage}
                                 </Alert>
                             )}
+                            
                             {roastScript && (
-                                <Box mt={2}>
-                                    <Typography variant="h6" gutterBottom>Generated Script:</Typography>
-                                    <Paper elevation={2} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.05)' }}>
+                                <Card sx={{ mt: 2, bgcolor: 'rgba(255,255,255,0.05)' }}>
+                                    <CardContent>
+                                        <Typography variant="h6" gutterBottom>Generated Script:</Typography>
                                         <Typography variant="body1">{roastScript}</Typography>
-                                    </Paper>
-                                </Box>
+                                    </CardContent>
+                                </Card>
                             )}
                         </Grid>
                     </Grid>
                 </Paper>
 
-                {/* Tips Section */}
-                <Grid container spacing={3} sx={{ mt: 4 }}>
-                    {[
-                        { title: "Choose Wisely", description: "Select clear, interesting images for the best roast", icon: "🖼️" },
-                        { title: "Keep it Fun", description: "Remember, it's all in good humor!", icon: "😂" },
-                        { title: "Share Responsibly", description: "Make sure the subject is okay with the roast before sharing", icon: "🤝" }
-                    ].map((tip, index) => (
-                        <Grid item xs={12} md={4} key={index}>
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                            >
-                                <Card sx={{ bgcolor: 'rgba(255,255,255,0.1)', height: '100%' }}>
-                                    <CardContent>
-                                        <Typography variant="h2" align="center" sx={{ mb: 2 }}>
-                                            {tip.icon}
-                                        </Typography>
-                                        <Typography variant="h6" align="center" sx={{ color: 'white', mb: 1 }}>
-                                            {tip.title}
-                                        </Typography>
-                                        <Typography variant="body1" align="center" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                                            {tip.description}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        </Grid>
-                    ))}
-                </Grid>
+                {/* Settings Dialog */}
+                <Dialog open={settingsDialogOpen} onClose={() => setSettingsDialogOpen(false)}>
+                    <DialogTitle>Advanced Settings</DialogTitle>
+                    <DialogContent>
+                        <Stack spacing={3} sx={{ minWidth: 300, mt: 1 }}>
+                            <Box>
+                                <Typography gutterBottom>Video Duration (seconds)</Typography>
+                                <Slider
+                                    value={settings.duration}
+                                    onChange={(_, value) => handleSettingsChange('duration', value)}
+                                    min={5}
+                                    max={30}
+                                    marks
+                                    valueLabelDisplay="auto"
+                                />
+                            </Box>
+                            <FormControl fullWidth>
+                                <InputLabel>Roast Style</InputLabel>
+                                <Select
+                                    value={settings.roastStyle}
+                                    onChange={(e) => handleSettingsChange('roastStyle', e.target.value)}
+                                    label="Roast Style"
+                                >
+                                    <MenuItem value="funny">Funny</MenuItem>
+                                    <MenuItem value="witty">Witty</MenuItem>
+                                    <MenuItem value="sarcastic">Sarcastic</MenuItem>
+                                    <MenuItem value="playful">Playful</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setSettingsDialogOpen(false)}>Close</Button>
+                    </DialogActions>
+                </Dialog>
 
-                {/* Alerts */}
+                {/* Share Dialog */}
+                <Dialog open={shareDialogOpen} onClose={() => setShareDialogOpen(false)}>
+                    <DialogTitle>Share Video</DialogTitle>
+                    <DialogContent>
+                        <Stack direction="row" spacing={2} justifyContent="center" sx={{ p: 2 }}>
+                            <IconButton color="primary" onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${videoUrl}`)}>
+                                <Facebook />
+                            </IconButton>
+                            <IconButton color="info" onClick={() => window.open(`https://twitter.com/intent/tweet?url=${videoUrl}`)}>
+                                <Twitter />
+                            </IconButton>
+                            <IconButton color="primary" onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${videoUrl}`)}>
+                                <LinkedIn />
+                            </IconButton>
+                            <IconButton color="success" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(videoUrl)}`)}>
+                                <WhatsApp />
+                            </IconButton>
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setShareDialogOpen(false)}>Close</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Alert */}
                 <Snackbar
                     open={alert.open}
                     autoHideDuration={6000}
                     onClose={handleCloseAlert}
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 >
-                    <Alert
-                        onClose={handleCloseAlert}
-                        severity={alert.severity}
-                        sx={{ width: '100%' }}
-                    >
+                    <Alert onClose={handleCloseAlert} severity={alert.severity}>
                         {alert.message}
                     </Alert>
                 </Snackbar>

@@ -1,97 +1,261 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaGoogle } from 'react-icons/fa';
+import {
+  Box,
+  Container,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  InputAdornment,
+  IconButton,
+  Divider,
+  Alert,
+  Checkbox,
+  FormControlLabel,
+} from '@mui/material';
+import {
+  Google as GoogleIcon,
+  Visibility,
+  VisibilityOff,
+  Email,
+  Lock,
+} from '@mui/icons-material';
 import { loginWithEmailAndPassword, loginWithGoogle } from '../firebase';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    rememberMe: false,
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        const result = await loginWithEmailAndPassword(email, password);
-        if (result.success) {
-            navigate('/'); // Redirect to home page after successful login
+  const handleChange = (e) => {
+    const { name, value, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'rememberMe' ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    
+    try {
+      const result = await loginWithEmailAndPassword(formData.email, formData.password);
+      if (result.success) {
+        if (formData.rememberMe) {
+          localStorage.setItem('rememberedEmail', formData.email);
         } else {
-            setError(result.error);
+          localStorage.removeItem('rememberedEmail');
         }
-    };
+        navigate('/');
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleGoogleLogin = async () => {
-        setError('');
-        const result = await loginWithGoogle();
-        if (result.success) {
-            navigate('/'); // Redirect to home page after successful login
-        } else {
-            setError(result.error);
-        }
-    };
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const result = await loginWithGoogle();
+      if (result.success) {
+        navigate('/');
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Failed to sign in with Google. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 animate-gradient-x">
-            <div className="bg-white p-8 rounded-lg shadow-md w-96">
-                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
-                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-purple-600 text-white font-bold py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300"
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        background: 'linear-gradient(to bottom, #111827, #4c1d95, #111827)',
+        padding: '20px',
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={8}
+          sx={{
+            padding: 4,
+            backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: 2,
+          }}
+        >
+          <Typography
+            variant="h4"
+            align="center"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              background: 'linear-gradient(45deg, #4c1d95, #1e40af)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
+            Welcome Back
+          </Typography>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              margin="normal"
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={handleChange}
+              margin="normal"
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
                     >
-                        Login
-                    </button>
-                </form>
-                <div className="mt-4">
-                    <button
-                        onClick={handleGoogleLogin}
-                        className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-md hover:bg-red-700 transition duration-300 flex items-center justify-center"
-                    >
-                        <FaGoogle className="mr-2" />
-                        Login with Google
-                    </button>
-                </div>
-                <div className="mt-4 text-center">
-                    <Link to="/forgot-password" className="text-sm text-purple-600 hover:text-purple-800">
-                        Forgot Password?
-                    </Link>
-                </div>
-                <div className="mt-6 text-center">
-                    <span className="text-gray-600">Don't have an account? </span>
-                    <Link to="/signup" className="text-purple-600 hover:text-purple-800">
-                        Sign up
-                    </Link>
-                </div>
-            </div>
-        </div>
-    );
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleChange}
+                    color="primary"
+                  />
+                }
+                label="Remember me"
+              />
+              <Link
+                to="/forget-password"
+                style={{
+                  color: '#4c1d95',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                Forgot Password?
+              </Link>
+            </Box>
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={loading}
+              sx={{
+                mt: 3,
+                mb: 2,
+                background: 'linear-gradient(45deg, #4c1d95, #1e40af)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #3c1773, #183385)',
+                },
+              }}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
+
+          <Divider sx={{ my: 2 }}>OR</Divider>
+
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            startIcon={<GoogleIcon />}
+            sx={{
+              mb: 2,
+              borderColor: '#4c1d95',
+              color: '#4c1d95',
+              '&:hover': {
+                borderColor: '#3c1773',
+                backgroundColor: 'rgba(76, 29, 149, 0.1)',
+              },
+            }}
+          >
+            Continue with Google
+          </Button>
+
+          <Typography align="center" color="textSecondary">
+            Don't have an account?{' '}
+            <Link
+              to="/signup"
+              style={{
+                color: '#4c1d95',
+                textDecoration: 'none',
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              }}
+            >
+              Sign up
+            </Link>
+          </Typography>
+        </Paper>
+      </Container>
+    </Box>
+  );
 };
 
 export default Login;

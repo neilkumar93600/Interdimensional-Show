@@ -3,13 +3,14 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
   CssBaseline, AppBar, Toolbar, Typography, Container, Grid, Card, CardContent,
   CardMedia, Button, IconButton, Badge, Slider, TextField, Avatar, List,
-  ListItem, ListItemText, ListItemAvatar,  Dialog, DialogActions,
-  DialogContent, DialogContentText, DialogTitle
+  ListItem, ListItemText, ListItemAvatar, Dialog, DialogActions,
+  DialogContent, DialogContentText, DialogTitle, Paper
 } from '@mui/material';
-import {Person as PersonIcon,
+import {
+  Person as PersonIcon,
   Favorite as FavoriteIcon, Share as ShareIcon, VolumeUp as VolumeUpIcon,
   Send as SendIcon, CalendarToday as CalendarTodayIcon,
-  BookOnline as BookOnlineIcon,
+  BookOnline as BookOnlineIcon, Construction as ConstructionIcon
 } from '@mui/icons-material';
 
 const theme = createTheme({
@@ -155,78 +156,101 @@ const EntertainmentHub = () => {
             </Typography>
           </Toolbar>
         </AppBar>
-        <Container className="py-8">
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <StreamSection type="comedy" stream={streams.comedy} />
+
+        {/* Construction Popup Overlay */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 pointer-events-auto" style={{ top: '64px' }}>
+          <Paper className="p-8 max-w-md mx-auto bg-gradient-to-r from-blue-900 to-purple-900 rounded-xl shadow-2xl text-center">
+            <ConstructionIcon className="text-yellow-400 text-6xl mb-4" />
+            <Typography variant="h4" className="text-cyan-300 mb-4">
+              Under Construction
+            </Typography>
+            <Typography variant="body1" className="text-gray-300 mb-6">
+              We're working hard to bring you an amazing entertainment experience.
+              Please check back soon!
+            </Typography>
+            <Typography variant="subtitle2" className="text-pink-300">
+              Expected completion: Coming Soon
+            </Typography>
+          </Paper>
+        </div>
+
+        {/* Main Content (now behind overlay) */}
+        <div className="pointer-events-none">
+          <Container className="py-8">
+            <Grid container spacing={4}>
+              <Grid item xs={12}>
+                <StreamSection type="comedy" stream={streams.comedy} />
+              </Grid>
+              <Grid item xs={12}>
+                <StreamSection type="music" stream={streams.music} />
+              </Grid>
+              <Grid item xs={12}>
+                <Card className="bg-gradient-to-r from-blue-900 to-purple-900 rounded-3xl shadow-2xl backdrop-blur-lg">
+                  <CardContent>
+                    <Typography variant="h5" className="mb-4 text-cyan-300">Upcoming Shows</Typography>
+                    <Grid container spacing={2}>
+                      {upcomingShows.map((show) => (
+                        <Grid item xs={12} sm={6} md={4} key={show.id}>
+                          <Card className="bg-black bg-opacity-30 rounded-xl">
+                            <CardContent>
+                              <Typography variant="h6" className="text-pink-300">{show.title}</Typography>
+                              <Typography variant="body2">Host: {show.host}</Typography>
+                              <Typography variant="body2">Date: {show.date}</Typography>
+                              <Typography variant="body2">Time: {show.time}</Typography>
+                              <Button
+                                variant="outlined"
+                                color="secondary"
+                                startIcon={<CalendarTodayIcon />}
+                                onClick={() => handleOpenDialog(show)}
+                                className="mt-2"
+                              >
+                                Add to Calendar
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12}>
+                <Card className="bg-gradient-to-r from-blue-900 to-purple-900 rounded-3xl shadow-2xl backdrop-blur-lg">
+                  <CardContent>
+                    <Typography variant="h5" className="mb-4 text-cyan-300">Live Chat</Typography>
+                    <List>
+                      {chatMessages.map((message, index) => (
+                        <ListItem key={index}>
+                          <ListItemAvatar>
+                            <Avatar>
+                              <PersonIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText primary={message.user} secondary={message.text} />
+                        </ListItem>
+                      ))}
+                    </List>
+                    <div className="flex mt-4">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        placeholder="Type your message..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      />
+                      <IconButton color="primary" onClick={handleSendMessage}>
+                        <SendIcon />
+                      </IconButton>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <StreamSection type="music" stream={streams.music} />
-            </Grid>
-            <Grid item xs={12}>
-              <Card className="bg-gradient-to-r from-blue-900 to-purple-900 rounded-3xl shadow-2xl backdrop-blur-lg">
-                <CardContent>
-                  <Typography variant="h5" className="mb-4 text-cyan-300">Upcoming Shows</Typography>
-                  <Grid container spacing={2}>
-                    {upcomingShows.map((show) => (
-                      <Grid item xs={12} sm={6} md={4} key={show.id}>
-                        <Card className="bg-black bg-opacity-30 rounded-xl">
-                          <CardContent>
-                            <Typography variant="h6" className="text-pink-300">{show.title}</Typography>
-                            <Typography variant="body2">Host: {show.host}</Typography>
-                            <Typography variant="body2">Date: {show.date}</Typography>
-                            <Typography variant="body2">Time: {show.time}</Typography>
-                            <Button
-                              variant="outlined"
-                              color="secondary"
-                              startIcon={<CalendarTodayIcon />}
-                              onClick={() => handleOpenDialog(show)}
-                              className="mt-2"
-                            >
-                              Add to Calendar
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12}>
-              <Card className="bg-gradient-to-r from-blue-900 to-purple-900 rounded-3xl shadow-2xl backdrop-blur-lg">
-                <CardContent>
-                  <Typography variant="h5" className="mb-4 text-cyan-300">Live Chat</Typography>
-                  <List>
-                    {chatMessages.map((message, index) => (
-                      <ListItem key={index}>
-                        <ListItemAvatar>
-                          <Avatar>
-                            <PersonIcon />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText primary={message.user} secondary={message.text} />
-                      </ListItem>
-                    ))}
-                  </List>
-                  <div className="flex mt-4">
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      placeholder="Type your message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    />
-                    <IconButton color="primary" onClick={handleSendMessage}>
-                      <SendIcon />
-                    </IconButton>
-                  </div>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Container>
+          </Container>
+        </div>
+
+        {/* Dialog for Calendar/Booking */}
         <Dialog open={openDialog} onClose={handleCloseDialog}>
           <DialogTitle className="bg-gradient-to-r from-blue-800 to-purple-800 text-cyan-300">
             {selectedShow?.title}

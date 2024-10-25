@@ -1,59 +1,179 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  InputAdornment,
+  Alert,
+  CircularProgress,
+} from '@mui/material';
+import {
+  Email,
+  LockReset,
+} from '@mui/icons-material';
 import { resetPassword } from '../firebase';
 
 const ForgotPassword = () => {
-    const [email, setEmail] = useState('');
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setMessage('');
-        setError('');
-        const result = await resetPassword(email);
-        if (result.success) {
-            setMessage('Password reset email sent. Please check your inbox.');
-        } else {
-            setError(result.error);
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    setError('');
+    
+    try {
+      const result = await resetPassword(email);
+      if (result.success) {
+        setMessage('Password reset email sent. Please check your inbox.');
+        setEmail(''); // Clear email field after successful submission
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 animate-gradient-x">
-            <div className="bg-white p-8 rounded-lg shadow-md w-96">
-                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Forgot Password</h2>
-                {message && <p className="text-green-500 text-sm mb-4">{message}</p>}
-                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-600"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-pink-600 text-white font-bold py-2 px-4 rounded-md hover:bg-pink-700 transition duration-300"
-                    >
-                        Reset Password
-                    </button>
-                </form>
-                <div className="mt-6 text-center">
-                    <Link to="/login" className="text-pink-600 hover:text-pink-800">
-                        Back to Login
-                    </Link>
-                </div>
-            </div>
-        </div>
-    );
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        background: 'linear-gradient(to bottom, #111827, #4c1d95, #111827)',
+        padding: '20px',
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={8}
+          sx={{
+            padding: 4,
+            backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: 2,
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 3,
+            }}
+          >
+            <LockReset
+              sx={{
+                fontSize: 40,
+                mr: 2,
+                background: 'linear-gradient(45deg, #4c1d95, #1e40af)',
+                borderRadius: '50%',
+                padding: 1,
+                color: 'white',
+              }}
+            />
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(45deg, #4c1d95, #1e40af)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+              }}
+            >
+              Reset Password
+            </Typography>
+          </Box>
+
+          <Typography
+            variant="body1"
+            align="center"
+            color="textSecondary"
+            sx={{ mb: 3 }}
+          >
+            Enter your email address and we'll send you instructions to reset your password.
+          </Typography>
+
+          {message && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {message}
+            </Alert>
+          )}
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              margin="normal"
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={loading}
+              sx={{
+                mt: 3,
+                mb: 2,
+                height: 48,
+                background: 'linear-gradient(45deg, #4c1d95, #1e40af)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #3c1773, #183385)',
+                },
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Send Reset Link'
+              )}
+            </Button>
+          </form>
+
+          <Typography align="center" sx={{ mt: 2 }}>
+            <Link
+              to="/login"
+              style={{
+                color: '#4c1d95',
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Back to Login
+            </Link>
+          </Typography>
+        </Paper>
+      </Container>
+    </Box>
+  );
 };
 
 export default ForgotPassword;

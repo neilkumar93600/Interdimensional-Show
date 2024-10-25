@@ -51,8 +51,6 @@ const HomePage = () => {
         { title: "Generate Song by Description", description: "Create a unique song based on your description", icon: <Music />, path: "/song-creation" },
         { title: "Custom Song", description: "Tailor every aspect of your song", icon: <Mic />, path: "/custom-song" },
         { title: "Extend Song", description: "Lengthen your favorite tracks seamlessly", icon: <Clock />, path: "/extend-song" },
-        { title: "Instrumental Song", description: "Create backing tracks or standalone instrumentals", icon: <Music />, path: "/instrumental" },
-        { title: "Mix & Master", description: "Polish your tracks to perfection", icon: <Sliders />, path: "/mix-and-master" }
     ];
 
     const getTrendingTitle = () => {
