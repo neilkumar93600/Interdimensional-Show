@@ -14,7 +14,6 @@ import Comedystudio from './pages/comedy-studio';
 import FifteenReel from './pages/15-Reel';  // Import the 15-Reel component
 import LoFiPage from './pages/LoFiPage';
 import SongCreation from './pages/song-creation';
-import CaptionGenerator from './pages/caption-generator';
 import CustomSongGenerator from './pages/custom-song-generator';
 
 
@@ -37,7 +36,6 @@ function App() {
             <Route path="/15-reel" element={<FifteenReel />} />
             <Route path="/lofi-converter" element={<LoFiPage />} />
             <Route path="/song-creation" element={<SongCreation />} />
-            <Route path="/caption-generator" element={<CaptionGenerator />} />
             <Route path="/custom-song" element={<CustomSongGenerator />} />
           </Routes>
         </main>
