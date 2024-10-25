@@ -53,28 +53,28 @@ const ComedyStudioPage = () => {
     {
       icon: Video,
       title: "15-Reel Format",
-      description: "Create hilarious 15-second comedy reels that'll make everyone laugh",
+      description: "Create hilarious 15-second comedy reels that will have everyone in stitches.",
       onClick: () => navigate('/15-reel')
     },
     {
       icon: Image,
       title: "Story Generation",
-      description: "Turn any image into a comedic roasting masterpiece",
+      description: "Craft unique, captivating stories with just a few clicks.",
       onClick: () => navigate('/Storytime')
     },
     {
       icon: Mic,
       title: "Comedy Script Generator",
-      description: "Generate stand-up comedy material with AI assistance",
+      description: "Generate witty and original comedy scripts for any occasion.",
       onClick: () => navigate('/comedy')
     },
     {
       icon: Share,
       title: "Caption Generation",
-      description: "Connect with other comedians and create together",
+      description: "Create catchy captions that perfectly capture the moment.",
       onClick: () => navigate('/caption-generator')
     }
-  ];
+];
 
   const tutorialVideos = Array(10).fill(null).map((_, i) => ({
     id: i + 1,
